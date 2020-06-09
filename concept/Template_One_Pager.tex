@@ -1,0 +1,84 @@
+% Template for the iniital assignment for the seminar 
+% Domain-specific architectures for deep neural networks"
+% summer semester 2020
+%
+
+\documentclass[10pt,twocolumn]{article}
+
+
+\usepackage{url}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{paralist}
+\usepackage{xcolor}
+
+
+\geometry{verbose,paperwidth=21cm,paperheight=29.7cm}
+\geometry{tmargin=20mm,bmargin=25mm,lmargin=20mm,rmargin=20mm}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%% configure these settings and you are good to go %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\participant}{<my name>}
+\newcommand{\affiliation}{Paderborn University}
+\urldef{\emailaddress}\url{<my-UPB-email-address>}
+\newcommand{\topic}{Computational Patterns for Deep Neural Networks}
+\newcommand{\submissiondate}{April ?, 2020}
+
+
+\begin{document}
+
+\title{\topic}
+\author{\Large{\participant}\\ \affiliation \\ {\small \emailaddress}}
+\date{\submissiondate}
+\maketitle
+\thispagestyle{empty}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%% here starts the actual text                     %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Introduction}
+\label{sec:introduction}
+
+\color{blue}
+The initial assignment is to write a {\bf one-page summary} about the computational patterns required by the most popular types of deep neural networks: multilayer perceptron, convolutional neural network, and recurrent neural network. It is not required to detail the exact number of computations needed or to include figures to show how the computations are arranged. Rather, focus on the type of computations needed and present the operational density for the different network types. As a reference, it is sufficient to use Chapter 7.3 from~\cite{Hennessy_Patterson_2017}, which has been provided on PANDA. Since this is a one-page summary, there is no need for an abstract or conclusions. Provide an introduction and then a number of sections as fits. Use this template for the one-pager. 
+
+There are the following goals we pursue with this initial assignment:
+
+\begin{itemize}
+\item Check who actually actively pursues the seminar.
+\item Make sure participants understand the computational patters for DNNs.  
+\item Make sure participants have LaTex/BibTex type setting tools running.
+\end{itemize}
+	
+\color{black}
+
+\color{red}
+This assignment is used as {\em Studienleistung} for the seminar, that means you need to submit it and pass, but it will not be included in the final grading. \\
+
+{\bf Deadline: May 3, 2020, submit PDF via PANDA.}
+\color{black}
+
+\section{Section ....}
+\label{sec:First_Section}
+
+....
+
+
+
+
+%% the following commands include the biliographic information (in BibTeX format) from the 
+%% file template.bib
+\bibliography{Template_One_Pager.bib}
+\bibliographystyle{plain}
+
+\end{document}
