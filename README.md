@@ -18,3 +18,11 @@ https://apmonitor.com/pdc/index.php/Main/SolveDifferentialEquations
 https://scipython.com/book/chapter-8-scipy/additional-examples/the-sir-epidemic-model/
 
 https://data.europa.eu/euodp/en/data/dataset/covid-19-coronavirus-data
+
+
+
+Countries Dataset:
+https://www.naturalearthdata.com/downloads/110m-cultural-vectors/110m-admin-0-countries/
+
+Countries Geocodes: 
+https://developers.google.com/public-data/docs/canonical/countries_csv
