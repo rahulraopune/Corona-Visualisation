@@ -7,3 +7,5 @@ data = pd.read_csv('datasets/owid-covid-data.csv').groupby(['location'], as_inde
 tData = data.loc[data['location'].isin(['India'])]
 
 print(tData['new_deaths']) 
+
+print(data.dtypes)
