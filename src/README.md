@@ -24,3 +24,11 @@ You can see the list of packages installed using the following command:
 Whenever you install any new package please run the following command so that after pushing to Git, anyone can just install the required packages from the requirements.txt file.
 
         pip3 freeze > requirements.txt
+
+
+
+
+
+Data characterstics:
+
+        https://github.com/owid/covid-19-data/blob/master/public/data/owid-covid-data-codebook.md
