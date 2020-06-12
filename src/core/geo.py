@@ -46,16 +46,15 @@ covidDataFrame.head()
 
 
 geoDataFrame = geoDataFrame.merge(
-    covidDataFrame, left_on='country_code', right_on='iso_code')
+    covidDataFrame, left_on='country_code', right_on='iso_code', how='left')
 
 
-# Define a sequential multi-hue color palette.
+# sequential multi-hue color palette.
 palette = brewer['YlGnBu'][8]
-# Reverse color order so that dark blue is highest obesity.
+# reverse color order so that dark blue is highest obesity.
 palette = palette[::-1]
-# Instantiate LinearColorMapper that linearly maps numbers in a range, into a sequence of colors.
 color_mapper = LinearColorMapper(palette=palette, low=0, high=8)
-# Define custom tick labels for color bar.
+# define custom tick labels for color bar.
 # tick_labels = {'0': '0%', '5': '5%', '10': '10%', '15': '15%',
 #                '20': '20%', '25': '25%', '30': '30%', '35': '35%', '40': '>40%'}
 # Create color bar.
@@ -65,24 +64,17 @@ color_bar = ColorBar(color_mapper=color_mapper, label_standoff=8, width=500, hei
 
 plot = figure(title='Worldwide Spread of COVID-19',
               plot_height=800, plot_width=1500, toolbar_location=None)
-plot.xgrid.grid_line_color = None
-plot.ygrid.grid_line_color = None
-
-# Specify figure layout.
 plot.add_layout(color_bar, 'below')
+plot.axis.visible = False
+# plot.xgrid.grid_line_color = None
+# plot.ygrid.grid_line_color = None
 
 jsonGeoData = json.loads(geoDataFrame.to_json())
 patch = plot.patches(xs="xs", ys="ys", source=GeoJSONDataSource(geojson=json.dumps(jsonGeoData)),
                      fill_color={'field': 'normalized_new_cases', 'transform': color_mapper}, line_color='black', line_width=0.35, fill_alpha=1, hover_fill_color="#fec44f")
 
 
-# point = plot.circle('longitude', 'latitude', source=ColumnDataSource(geoCovid),
-#                     radius='scaled_total_cases', alpha=0.2)
-
 plot.add_tools(HoverTool(tooltips=[('Country', '@country'), ('Total Cases',
                                                              '@new_cases_formatted'), ('Total Deaths', '@new_deaths_formatted')], renderers=[patch]))
 
 show(plot)
-
-# print(geoCovid)
-# print(geoCovid[geoCovid['location'] == 'India'])
