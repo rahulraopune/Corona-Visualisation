@@ -1,9 +1,6 @@
-% Template for the iniital assignment for the seminar 
-% Domain-specific architectures for deep neural networks"
-% summer semester 2020
-%
-
+% 
 \documentclass[10pt]{article}
+
 
 
 \usepackage{url}
@@ -15,27 +12,33 @@
 \usepackage{graphicx}
 \usepackage{paralist}
 \usepackage{xcolor}
-
+% \usepackage{fancyhdr}
 
 \geometry{verbose,paperwidth=21cm,paperheight=29.7cm}
 \geometry{tmargin=20mm,bmargin=25mm,lmargin=20mm,rmargin=20mm}
 
-
+% \fancyhead{}
+% \fancyhead[LO]{Team Mask (Group 09): Rahul Rao, Rajath Acharya, Ramu Ramasamy, Sachin Sudhakar Shetty, Vishwas}
+% \fancyfoot[LO]{Interactive Data Visualization}
+% \fancyfoot[E]{\thepage}
+% \fancyfoot[R]{\thepage}
+% \fancyfoot[C]{}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%% configure these settings and you are good to go %%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newcommand{\participant}{Sachin Sudhakar Shetty}
+\newcommand{\participant}{Team Mask (Group 09)}
 \newcommand{\affiliation}{Paderborn University}
-%\urldef{\emailaddress}\url{<my-UPB-email-address>}
+% \urldef{\emailaddress}\url{<my-UPB-email-address>}
 \newcommand{\topic}{Assignment 5: Group Project Interactivity}
-\newcommand{\submissiondate}{June 17th, 2020}
+\newcommand{\submissiondate}{June 17, 2020}
 
+% 
 
 \begin{document}
 
 \title{\topic}
-\author{\Large{\participant}\\ \affiliation \\ {\small \emailaddress}}
+\author{\Large{\participant}\\ \affiliation \\}
 \date{\submissiondate}
 \maketitle
 \thispagestyle{empty}
@@ -50,11 +53,106 @@
 %\label{sec:introduction}
 
 \color{black}
-At present, where University, Organization, Institution, Restaurant etc... Completely Shut but except Hospitals which are working 24*7, yes its {\bf COVID-19}. A pandemic which has shaken the economy of the world. As battle continues, data sets corresponding to the virus disease is collected around the globe. This concept  paper is on the Topic: COVID-19 as part of the Assignment  to the subject Module: Interactive Data Visualization which we here summaries about the DataSet of covid-19 disease used and visualization plus interaction provided to the end user.	
+At present, where University, Organization, Institution, Restaurant etc... Completely shut but except Hospitals which are working 24*7, yes its {\bf COVID-19}. A pandemic which has shaken the economy of the world. As battle continues, data sets corresponding to the virus disease is collected around the globe. This concept  paper is on the Topic: COVID-19 as part of the Assignment  to the subject Module: Interactive Data Visualization which we here summaries about the DataSet of covid-19 disease used and visualization plus interaction provided to the end user.	
 \color{black}
 
 \section{Data Characteristics}
 
+The dataset characteristics are described in the Table \ref{tab:data_chars}. The dataset comprises data from different sources mentioned in Table \ref{tab:data_sources}. All the data are comprised in the file \textit{owid-covid-data.csv} and the data is available as comma separated strings. The dataset contains 22873 records and 33 columns (on June 12, 2020). Also, dataset containing the polygons, used to form a World Map for representing geo spatial mapping information is sourced from Natural Earth (Admin-0 Countries). 
+
+% that include European Centre for Disease Prevention and Control, National government reports, United Nations, Department of Economic and Social Affairs, Population Division, World Population Prospects: The 2019 Revision, World Bank – World Development Indicators, sourced from Food and Agriculture Organization and World Bank estimates, UN Population Division, World Population Prospects, 2017 Revision, United Nations Statistics Division, and OECD, Eurostat, World Bank, national government records and other sources.
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{|p{6cm}|p{6cm}|}
+        \hline
+        European Centre for Disease Prevention and Control &  National government reports \\
+        \hline 
+        Department of Economic and Social Affairs & United Nations \\
+        \hline
+        World Population Prospects: The 2019 Revision & Population Division \\
+        \hline 
+        OECD & Eurostat \\
+        \hline
+        World Bank – World Development Indicators, sourced from Food and Agriculture Organization and World Bank estimates &  UN Population Division, World Population Prospects, 2017 Revision\\
+        \hline
+    \end{tabular}
+	\caption{Sources}
+	\label{tab:data_sources}
+\end{table}
+
+\begin{table}[htbp]
+    \centering
+	\begin{tabular}{|l|l|p{8cm}|}
+		\hline
+		\textbf{Data} & \textbf{Data Type} & \textbf{Description} \\
+        \hline \hline
+        iso\_code & String & ISO 3166-1 alpha-3 (3 letter country codes) \\
+        \hline
+        continent & String & Continent name \\
+        \hline
+        location & String & Country name \\
+        \hline
+        date & String & Date of observation \\
+        \hline
+        total\_cases & int64 & Total confirmed cases of COVID-19 \\
+        \hline
+        new\_cases & int64 & New confirmed cases  \\
+        \hline
+        total\_deaths & int64 & Total deaths attributed \\
+        \hline
+        new\_deaths & int64 & New deaths \\
+        \hline
+        total\_cases\_per\_million & float64 & Total confirmed cases per one million people \\
+        \hline
+        new\_cases\_per\_million & float64 & New confirmed cases per one million people  \\
+        \hline
+        total\_deaths\_per\_million & float64 & Total deaths per one million people \\
+        \hline
+        new\_deaths\_per\_million & float64 & New deaths per one million people \\
+        \hline
+        total\_tests & float64 & Total tests conducted \\
+        \hline
+        new\_tests & float64 & New tests conducted \\
+        \hline
+        new\_tests\_smoothed & float64 & New tests (7 day smoothed). For countries not reporting data on daily basis. \\
+        \hline
+        new\_tests\_per\_thousand & float64 & New tests per thousand people \\
+        \hline
+        new\_tests\_smoothed\_per\_thousand & float64 & New tests per thousand people (7 day smoothed) \\
+        \hline
+        tests\_units & float64 & Units used by the location to report the testing data \\
+        \hline
+        population & float64 & Population in 2020 \\
+        \hline
+        population\_density & float64 & Number of people divided by land area, measured in square kilometers, most recent year available. \\
+        \hline
+        median\_age & float64 & Median age of the population, UN projection for 2020. \\
+        \hline
+        aged\_65\_older & float64 & Share of the population that is 65 years and older. \\
+        \hline
+        aged\_70\_older & float64 & Share of the population that is 70 years and older in 2015. \\
+        \hline
+        gdp\_per\_capita & float64 & Gross domestic product at purchasing power parity (constant 2011 international dollars), most recent year available. \\
+        \hline
+        extreme\_poverty & float64 & Share of the population living in extreme poverty, most recent year available since 2010. \\
+        \hline
+        cvd\_death\_rate & float64 & Death rate from cardiovascular disease in 2017. \\
+        \hline
+        diabetes\_prevalence & float64 & Diabetes prevalence (\% of population aged 20 to 79) in 2017. \\
+        \hline
+        female\_smokers & float64 & Share of women who smoke, most recent year available. \\
+        \hline
+        male\_smokers & float64 & Share of men who smoke, most recent year available. \\
+        \hline
+        handwashing\_facilities & float64 & Share of the population with basic handwashing facilities on premises, most recent year available. \\
+        \hline
+        hospital\_beds\_per\_thousand & float64 & Hospital beds per 1,000 people, most recent year available since 2010. \\
+        \hline
+    \end{tabular}
+	\caption{Data Characteristics}
+	\label{tab:data_chars}
+\end{table}
 
 
 

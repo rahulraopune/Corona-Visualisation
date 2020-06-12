@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.5.23)  12 JUN 2020 20:19
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.5.23)  12 JUN 2020 22:51
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -119,21 +119,21 @@ File: l3backend-pdfmode.def 2020-03-12 L3 backend support: PDF mode
 ) (/Users/ramuramasamy/UPB/IDV/Assignments/IDVAssign5/concept/main.aux)
 \openout1 = `main.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 35.
-LaTeX Font Info:    ... okay on input line 35.
-LaTeX Font Info:    Trying to load font information for T1+ptm on input line 35.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 38.
+LaTeX Font Info:    ... okay on input line 38.
+LaTeX Font Info:    Trying to load font information for T1+ptm on input line 38.
  (/usr/local/texlive/2020/texmf-dist/tex/latex/psnfss/t1ptm.fd
 File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
 )
@@ -195,42 +195,34 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 48
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 40.
+(Font)              <12> on input line 43.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 40.
+(Font)              <8> on input line 43.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 40.
-
-/Users/ramuramasamy/UPB/IDV/Assignments/IDVAssign5/concept/main.tex:40: Undefined control sequence.
-\@author ...\affiliation \\ {\small \emailaddress 
-                                                  }
-l.40 \maketitle
-               
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
-
-LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 65.
-(/usr/local/texlive/2020/texmf-dist/tex/latex/psnfss/ts1ptm.fd
+(Font)              <6> on input line 43.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 67.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 67.
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 163.
+ (/usr/local/texlive/2020/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 ) [1
 
-{/usr/local/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] (/Users/ramuramasamy/UPB/IDV/Assignments/IDVAssign5/concept/main.aux) ) 
+{/usr/local/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2] [3] (/Users/ramuramasamy/UPB/IDV/Assignments/IDVAssign5/concept/main.aux) ) 
 Here is how much of TeX's memory you used:
- 3251 strings out of 480608
- 44646 string characters out of 5903630
- 303519 words of memory out of 5000000
- 19116 multiletter control sequences out of 15000+600000
- 554289 words of font info for 48 fonts, out of 8000000 for 9000
+ 3256 strings out of 480608
+ 44712 string characters out of 5903630
+ 315531 words of memory out of 5000000
+ 19119 multiletter control sequences out of 15000+600000
+ 555493 words of font info for 49 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 30i,7n,37p,650b,240s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/texlive/2020/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/urw/times/utmr8a.pfb>
-Output written on /Users/ramuramasamy/UPB/IDV/Assignments/IDVAssign5/concept/main.pdf (1 page, 30311 bytes).
+ 30i,10n,37p,650b,243s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/texlive/2020/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on /Users/ramuramasamy/UPB/IDV/Assignments/IDVAssign5/concept/main.pdf (3 pages, 44213 bytes).
 PDF statistics:
- 17 PDF objects out of 1000 (max. 8388607)
- 11 compressed objects within 1 object stream
+ 27 PDF objects out of 1000 (max. 8388607)
+ 18 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
