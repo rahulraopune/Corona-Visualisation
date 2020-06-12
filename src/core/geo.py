@@ -7,6 +7,7 @@ from bokeh.io import show, output_file
 from bokeh.plotting import figure
 from bokeh.models import GeoJSONDataSource, LinearColorMapper, HoverTool, ColorBar
 from bokeh.palettes import brewer
+import locale
 
 # geomap
 geoDataFrame = gpd.read_file(
@@ -19,17 +20,25 @@ geoDataFrame.head()
 
 
 # COVID-19 dataset
-covidDataFrame = pd.read_csv(
-    'datasets/owid-covid-data.csv').groupby(['iso_code'], as_index=False).sum()
+datasetRaw = pd.read_csv('datasets/owid-covid-data.csv')
+covidDataFrame = datasetRaw.groupby(['iso_code'], as_index=False).sum()
 # drop World data
-print(covidDataFrame[covidDataFrame['iso_code'] == 'OWID_WRL']['new_cases'])
+# print(covidDataFrame[covidDataFrame['iso_code'] == 'OWID_WRL']['new_cases'])
 covidDataFrame = covidDataFrame.drop(covidDataFrame.index[150])
 # normalize values
 maxValue = max(covidDataFrame['new_cases'].values)
 minValue = min(covidDataFrame['new_cases'].values)
 delta = maxValue - minValue
 c = 8 / math.log2(maxValue)
-covidDataFrame['normalized_new_cases'] = [ c * math.log2(1 + value) for value in covidDataFrame['new_cases'].values]
+covidDataFrame['normalized_new_cases'] = [
+    c * math.log2(1 + value) for value in covidDataFrame['new_cases'].values]
+
+# format numbers to US locale for better readability
+locale.setlocale(locale.LC_ALL, 'en_US')
+covidDataFrame['new_cases_formatted'] = [locale.format_string(
+    "%d", value, grouping=True) for value in covidDataFrame['new_cases'].values]
+covidDataFrame['new_deaths_formatted'] = [locale.format_string(
+    "%d", value, grouping=True) for value in covidDataFrame['new_deaths'].values]
 
 # print(covidDataFrame[covidDataFrame['iso_code'] == 'USA'])
 # print(covidDataFrame[covidDataFrame['iso_code'] == 'IND'])
@@ -71,7 +80,7 @@ patch = plot.patches(xs="xs", ys="ys", source=GeoJSONDataSource(geojson=json.dum
 #                     radius='scaled_total_cases', alpha=0.2)
 
 plot.add_tools(HoverTool(tooltips=[('Country', '@country'), ('Total Cases',
-                                                             '@new_cases'), ('Total Deaths', '@new_deaths')], renderers=[patch]))
+                                                             '@new_cases_formatted'), ('Total Deaths', '@new_deaths_formatted')], renderers=[patch]))
 
 show(plot)
 
