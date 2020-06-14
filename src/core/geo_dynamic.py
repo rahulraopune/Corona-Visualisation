@@ -65,17 +65,6 @@ def normalizedTotalDeaths():
         c * math.log2(1 + value) for value in covidDataFrame['new_deaths'].values]
 
 
-def normalizedTotalCasesPerMillion():
-    # new_deaths is used here as it will contain the cumulative data as we sum() during grouping
-    maxValue = max(covidDataFrame['new_deaths'].values)
-    minValue = min(covidDataFrame['new_deaths'].values)
-    delta = maxValue - minValue
-    c = PALETTE_SIZE / math.log2(maxValue)
-    covidDataFrame['normalized_total_deaths'] = [
-        c * math.log2(1 + value) for value in covidDataFrame['new_deaths'].values]
-    covidDataFrame.head()
-
-
 normalizedTotalCases()
 normalizedTotalDeaths()
 
