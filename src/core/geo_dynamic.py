@@ -26,13 +26,10 @@ geoDataFrame.head()
 # COVID-19 dataset
 datasetRaw = pd.read_csv(
     join(dirname(__file__), 'datasets', 'owid-covid-data.csv'))
-covidDataFrame = datasetRaw.groupby(['iso_code'], as_index=False).sum()
 # drop World data
-# print(covidDataFrame[covidDataFrame['iso_code'] == 'OWID_WRL']['new_cases'])
-covidDataFrame = covidDataFrame.drop(covidDataFrame.index[150])
+datasetRaw = datasetRaw[datasetRaw.iso_code != 'OWID_WRL']
 
-
-# normalize values
+covidDataFrame = datasetRaw.groupby(['iso_code'], as_index=False).sum()
 
 
 # format numbers to en_US locale for better readability
@@ -41,8 +38,6 @@ covidDataFrame['new_cases_formatted'] = [locale.format_string(
     "%d", value, grouping=True) for value in covidDataFrame['new_cases'].values]
 covidDataFrame['new_deaths_formatted'] = [locale.format_string(
     "%d", value, grouping=True) for value in covidDataFrame['new_deaths'].values]
-
- 
 
 
 # print(covidDataFrame[covidDataFrame['iso_code'] == 'USA'])
@@ -57,9 +52,7 @@ def normalizedTotalCases():
     delta = maxValue - minValue
     c = PALETTE_SIZE / math.log2(maxValue)
     covidDataFrame['normalized_total_cases'] = [
-            c * math.log2(1 + value) for value in covidDataFrame['new_cases'].values]
-    covidDataFrame.head()
-
+        c * math.log2(1 + value) for value in covidDataFrame['new_cases'].values]
 
 
 def normalizedTotalDeaths():
@@ -69,8 +62,8 @@ def normalizedTotalDeaths():
     delta = maxValue - minValue
     c = PALETTE_SIZE / math.log2(maxValue)
     covidDataFrame['normalized_total_deaths'] = [
-            c * math.log2(1 + value) for value in covidDataFrame['new_deaths'].values]
-    covidDataFrame.head()    
+        c * math.log2(1 + value) for value in covidDataFrame['new_deaths'].values]
+
 
 def normalizedTotalCasesPerMillion():
     # new_deaths is used here as it will contain the cumulative data as we sum() during grouping
@@ -79,8 +72,8 @@ def normalizedTotalCasesPerMillion():
     delta = maxValue - minValue
     c = PALETTE_SIZE / math.log2(maxValue)
     covidDataFrame['normalized_total_deaths'] = [
-            c * math.log2(1 + value) for value in covidDataFrame['new_deaths'].values]
-    covidDataFrame.head()  
+        c * math.log2(1 + value) for value in covidDataFrame['new_deaths'].values]
+    covidDataFrame.head()
 
 
 normalizedTotalCases()
