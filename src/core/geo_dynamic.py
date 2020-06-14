@@ -26,8 +26,14 @@ geoDataFrame.head()
 # COVID-19 dataset
 datasetRaw = pd.read_csv(
     join(dirname(__file__), 'datasets', 'owid-covid-data.csv'))
-# drop World data
+# drop World data and drop iso_code with NaN values
 datasetRaw = datasetRaw[datasetRaw.iso_code != 'OWID_WRL']
+datasetRaw = datasetRaw.dropna(subset=['iso_code'])
+# convert date column to pandas date
+datasetRaw['date'] = pd.to_datetime(datasetRaw.date)
+# sort by date in descending
+datasetRaw = datasetRaw.sort_values(by='date', ascending=False)
+print(datasetRaw)
 
 covidDataFrame = datasetRaw.groupby(['iso_code'], as_index=False).sum()
 
