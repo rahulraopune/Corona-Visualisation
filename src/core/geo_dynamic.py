@@ -33,17 +33,17 @@ datasetRaw = datasetRaw.dropna(subset=['iso_code'])
 datasetRaw['date'] = pd.to_datetime(datasetRaw.date)
 # sort by date in descending
 datasetRaw = datasetRaw.sort_values(by='date', ascending=False)
-print(datasetRaw)
-
-covidDataFrame = datasetRaw.groupby(['iso_code'], as_index=False).sum()
+# print(datasetRaw)
+# select unique country values (as data is sorted in descending based on date and head 1 will give the most recent record of a country)
+covidDataFrame = datasetRaw.groupby(['iso_code'], as_index=False).head(1)
 
 
 # format numbers to en_US locale for better readability
 locale.setlocale(locale.LC_ALL, 'en_US')
-covidDataFrame['new_cases_formatted'] = [locale.format_string(
-    "%d", value, grouping=True) for value in covidDataFrame['new_cases'].values]
-covidDataFrame['new_deaths_formatted'] = [locale.format_string(
-    "%d", value, grouping=True) for value in covidDataFrame['new_deaths'].values]
+covidDataFrame['total_cases_formatted'] = [locale.format_string(
+    "%d", value, grouping=True) for value in covidDataFrame['total_cases']]
+covidDataFrame['total_deaths_formatted'] = [locale.format_string(
+    "%d", value, grouping=True) for value in covidDataFrame['total_deaths']]
 
 
 # print(covidDataFrame[covidDataFrame['iso_code'] == 'USA'])
@@ -52,30 +52,49 @@ covidDataFrame['new_deaths_formatted'] = [locale.format_string(
 
 
 def normalizedTotalCases():
-    # new_cases is used here as it will contain the cumulative data as we sum() during grouping
-    maxValue = max(covidDataFrame['new_cases'].values)
-    minValue = min(covidDataFrame['new_cases'].values)
+    maxValue = max(covidDataFrame['total_cases'].values)
+    minValue = min(covidDataFrame['total_cases'].values)
     delta = maxValue - minValue
     c = PALETTE_SIZE / math.log2(maxValue)
     covidDataFrame['normalized_total_cases'] = [
-        c * math.log2(1 + value) for value in covidDataFrame['new_cases'].values]
+        c * math.log2(1 + value) for value in covidDataFrame['total_cases']]
 
 
 def normalizedTotalDeaths():
-    # new_deaths is used here as it will contain the cumulative data as we sum() during grouping
-    maxValue = max(covidDataFrame['new_deaths'].values)
-    minValue = min(covidDataFrame['new_deaths'].values)
+    maxValue = max(covidDataFrame['total_deaths'].values)
+    minValue = min(covidDataFrame['total_deaths'].values)
     delta = maxValue - minValue
     c = PALETTE_SIZE / math.log2(maxValue)
     covidDataFrame['normalized_total_deaths'] = [
-        c * math.log2(1 + value) for value in covidDataFrame['new_deaths'].values]
+        c * math.log2(1 + value) for value in covidDataFrame['total_deaths']]
+
+
+def normalizedTotalCasesPerMillion():
+    maxValue = max(covidDataFrame['total_cases_per_million'].values)
+    minValue = min(covidDataFrame['total_cases_per_million'].values)
+    delta = maxValue - minValue
+    c = PALETTE_SIZE / math.log2(maxValue)
+    covidDataFrame['normalized_total_cases_per_million'] = [
+        c * math.log2(1 + value) for value in covidDataFrame['total_cases_per_million']]
+
+def normalizedTotalDeathsPerMillion():
+    maxValue = max(covidDataFrame['total_cases_per_million'].values)
+    minValue = min(covidDataFrame['total_cases_per_million'].values)
+    delta = maxValue - minValue
+    c = PALETTE_SIZE / math.log2(maxValue)
+    covidDataFrame['normalized_total_deaths_per_million'] = [
+        c * math.log2(1 + value) for value in covidDataFrame['total_deaths_per_million']]
 
 
 normalizedTotalCases()
 normalizedTotalDeaths()
+normalizedTotalCasesPerMillion()
+normalizedTotalDeathsPerMillion()
 
 geoDataFrame = geoDataFrame.merge(
     covidDataFrame, left_on='country_code', right_on='iso_code', how='left')
+# convert date column to string as datetime dtype cannot be converted as JSON
+geoDataFrame['date'] = geoDataFrame['date'].astype(str)
 jsonGeoData = json.loads(geoDataFrame.to_json())
 source = GeoJSONDataSource(geojson=json.dumps(jsonGeoData))
 
@@ -103,7 +122,7 @@ def init():
                          fill_color={'field': 'normalized_total_cases', 'transform': color_mapper}, line_color='black', line_width=0.35, fill_alpha=1, hover_fill_color="#fec44f")
 
     plot.add_tools(HoverTool(tooltips=[('Country', '@country'), ('Total Cases',
-                                                                 '@new_cases_formatted'), ('Total Deaths', '@new_deaths_formatted')], renderers=[patch]))
+                                                                 '@total_cases_formatted'), ('Total Deaths', '@total_deaths_formatted')], renderers=[patch]))
     plot.title.text = 'Total Cases Plot'
 
 
@@ -114,17 +133,23 @@ def generatePatchBasedOnSelect(selectValue):
     elif selectValue == 'Total Deaths':
         return plot.patches(xs="xs", ys="ys", source=source,
                             fill_color={'field': 'normalized_total_deaths', 'transform': color_mapper}, line_color='black', line_width=0.35, fill_alpha=1, hover_fill_color="#fec44f")
+    elif selectValue == 'Total Cases Per Million':
+        return plot.patches(xs="xs", ys="ys", source=source,
+                            fill_color={'field': 'normalized_total_cases_per_million', 'transform': color_mapper}, line_color='black', line_width=0.35, fill_alpha=1, hover_fill_color="#fec44f")
+    elif selectValue == 'Total Deaths Per Million':
+        return plot.patches(xs="xs", ys="ys", source=source,
+                            fill_color={'field': 'normalized_total_deaths_per_million', 'transform': color_mapper}, line_color='black', line_width=0.35, fill_alpha=1, hover_fill_color="#fec44f")
 
 
 def handleSelectorChange(attrname, old, new):
     print(attrname, old, new)
     patch = generatePatchBasedOnSelect(selector.value)
     plot.add_tools(HoverTool(tooltips=[('Country', '@country'), ('Total Cases',
-                                                                 '@new_cases_formatted'), ('Total Deaths', '@new_deaths_formatted')], renderers=[patch]))
+                                                                 '@total_cases_formatted'), ('Total Deaths', '@total_deaths_formatted')], renderers=[patch]))
     plot.title.text = '%s Plot' % (selector.value)
 
 
-selectOptions = ['Total Cases', 'Total Deaths']
+selectOptions = ['Total Cases', 'Total Deaths', 'Total Cases Per Million', 'Total Deaths Per Million']
 selector = Select(value=selectOptions[0], options=selectOptions)
 selector.on_change('value', handleSelectorChange)
 
