@@ -1,3 +1,5 @@
+from bokeh.transform import factor_cmap
+import pandas as pandaRef
 import math
 import pandas as pd
 import geopandas as gpd
@@ -8,9 +10,9 @@ import ssl
 from os.path import dirname, join
 from bokeh.io import show, curdoc
 from bokeh.plotting import figure
-from bokeh.models import GeoJSONDataSource, LinearColorMapper, HoverTool, ColorBar, Select
+from bokeh.models import GeoJSONDataSource, LinearColorMapper, HoverTool, ColorBar, Select, ColumnDataSource
 from bokeh.layouts import row, column
-from bokeh.palettes import brewer
+from bokeh.palettes import brewer, Spectral5
 from bokeh.events import Tap
 from geopy.geocoders import Nominatim
 
@@ -120,6 +122,9 @@ geoPlot = figure(plot_height=600, plot_width=1000,
 linePlot = figure(plot_height=600, plot_width=600)
 barPlot = figure(plot_height=600, plot_width=1200)
 
+months = ['2019/12','2020/1','2020/2','2020/3','2020/4','2020/5','2020/6']
+barPlot = figure(plot_height=600, plot_width=1200, x_range=months, title="Fruit Counts",
+        toolbar_location=None, tools="")
 
 def init():
     geoPlot.add_layout(color_bar, 'below')
@@ -176,12 +181,85 @@ def handleSelectorChange(attrname, old, new):
     geoPlot.title.text = '%s Plot' % (selector.value)
 
 
+################################
+############################################################################
+############################################################################
+# Sachin Code impplementation
+
+
+# Copy of the dataFrame
+dataFrameRef = datasetRaw
+
+
+def cleanDataFrame_Country(dataFrameRef, countryCode):
+
+    # drop World data and drop iso_code with NaN values
+    dataFrameRef = dataFrameRef[dataFrameRef.iso_code != 'OWID_WRL']
+
+    # Add new Year/Month Col and formatted the Year-Month-Day date field to Year/Month
+    dataFrameRef['YearMonth'] = pandaRef.to_datetime(dataFrameRef['date']).apply(
+        lambda x: '{year}/{month}'.format(year=x.year, month=x.month))
+    # sort by date in descending
+    dataFrameRef = dataFrameRef.sort_values(by='date', ascending=True)
+
+    # select unique country values (as data is sorted in descending based on date and head 1 will give the most recent record of a country)
+    uniqueDataFrame = dataFrameRef.groupby(
+        ['iso_code'], as_index=False).tail(1)
+
+    # print(uniqueDataFrame)
+
+    # sort by date in descending
+    #uniqueDataFrame = uniqueDataFrame.sort_values(by='total_cases', ascending=False)
+    #uniqueDataFrame = uniqueDataFrame.head(20)
+
+    #top20country = uniqueDataFrame['location']
+
+    countryDataFrame = dataFrameRef[dataFrameRef.iso_code == countryCode]
+    #print(countryDataFrame)
+    return countryDataFrame
+############################################################################
+
+#countryDataFrame = cleanDataFrame_Country(dataFrameRef, selectedCountryIsoCode)
+
+
+#barPlot.quad(source = countryDataFrame, bottom=0, top=countryDataFrame['total_cases'], right=countryDataFrame['Year/Month'], fill_color='red', line_color='black')
+
+def bar_subplotcountry(countryDataFrame):
+    print("Helo")
+    group = countryDataFrame.groupby('YearMonth', as_index=False).sum()
+    print(group['YearMonth'].values)
+    print(group['total_cases'].values)
+    #index_cmap = factor_cmap('YearMonth', palette=Spectral5, factors=sorted(countryDataFrame.YearMonth.unique()), end=1)
+    #barPlot.vbar(x=['a', 'b', 'c', 'd'], width=1, top=[0, 30, 467, 33527],
+     #            line_color="white")
+
+    #barPlot.y_range.start = 0
+    #barPlot.x_range.range_padding = 0.05
+    #barPlot.xgrid.grid_line_color = None
+    ##barPlot.xaxis.axis_label = "Manufacturer grouped by # Cylinders"
+    #barPlot.xaxis.major_label_orientation = 1.2
+    #barPlot.outline_line_color = None
+    
+
+    barPlot.vbar(x=months, top=group['total_cases'].values, width=0.9)
+
+    barPlot.xgrid.grid_line_color = None
+    barPlot.y_range.start = 0
+
+    
+
+
 def handleTap(model):
     country = findCountry((model.y, model.x))
     selectedCountryIsoCode = geoDataFrame[geoDataFrame['country']
                                           == country]['iso_code'].values[0]
 
-    # TODO: change line plot and bar plot here                                          
+    # TODO: change line plot and bar plot here
+    countryDataFrame = cleanDataFrame_Country(
+        dataFrameRef, selectedCountryIsoCode)
+    bar_subplotcountry(countryDataFrame)
+    #linePlot.quad(bottom=0, top=countryDataFrame['total_cases'], right=countryDataFrame['Year/Month'], fill_color='red', line_color='black')
+
     print(selectedCountryIsoCode)
     return selectedCountryIsoCode
 
@@ -197,44 +275,4 @@ init()
 
 layout = column(row(column(selector, geoPlot), linePlot), row(barPlot))
 curdoc().add_root(layout)
-
-
-############################################################################
-# Sachin Code impplementation
-
-import pandas as pandaRef
-
-#Copy of the dataFrame
-dataFrameRef=datasetRaw
-
-
-def cleanDataFrame_Country(dataFrameRef, countryCode):
-    
-    # drop World data and drop iso_code with NaN values
-    dataFrameRef = dataFrameRef[dataFrameRef.iso_code != 'OWID_WRL']
-
-    # Add new Year/Month Col and formatted the Year-Month-Day date field to Year/Month
-    dataFrameRef['Year/Month'] = pandaRef.to_datetime(dataFrameRef['date']).apply(lambda x: '{year}/{month}'.format(year=x.year, month=x.month))
-    # sort by date in descending
-    dataFrameRef = dataFrameRef.sort_values(by='date', ascending=True)
-
-    # select unique country values (as data is sorted in descending based on date and head 1 will give the most recent record of a country)
-    uniqueDataFrame = dataFrameRef.groupby(['iso_code'], as_index=False).tail(1)
-
-    #print(uniqueDataFrame)
-
-    # sort by date in descending
-    #uniqueDataFrame = uniqueDataFrame.sort_values(by='total_cases', ascending=False)
-    #uniqueDataFrame = uniqueDataFrame.head(20)
-
-    #top20country = uniqueDataFrame['location']
-
-    
-    countryDataFrame = dataFrameRef[dataFrameRef.iso_code == countryCode]
-    print(countryDataFrame)
-    return countryDataFrame
-
-
-countryDataFrame = cleanDataFrame_Country(dataFrameRef, selectedCountryIsoCode)
-
 
