@@ -9,7 +9,7 @@ from os.path import dirname, join
 from bokeh.io import show, curdoc
 from bokeh.plotting import figure
 from bokeh.models import GeoJSONDataSource, LinearColorMapper, HoverTool, ColorBar, Select
-from bokeh.layouts import column
+from bokeh.layouts import row, column
 from bokeh.palettes import brewer
 from bokeh.events import Tap
 from geopy.geocoders import Nominatim
@@ -115,41 +115,43 @@ color_mapper = LinearColorMapper(palette=palette, low=0, high=8)
 color_bar = ColorBar(color_mapper=color_mapper, label_standoff=8, width=500, height=20,
                      border_line_color=None, location=(0, 0), orientation='horizontal')
 
-plot = figure(plot_height=600, plot_width=1000,
-              tools="pan,wheel_zoom,reset,hover,save")
+geoPlot = figure(plot_height=600, plot_width=1000,
+                 tools="pan,wheel_zoom,reset,hover,save")
+linePlot = figure(plot_height=600, plot_width=600)
+barPlot = figure(plot_height=600, plot_width=1200)
 
 
 def init():
-    plot.add_layout(color_bar, 'below')
-    plot.axis.visible = False
-    # plot.xgrid.grid_line_color = None
-    # plot.ygrid.grid_line_color = None
-    patch = plot.patches(xs="xs", ys="ys", source=source,
-                         fill_color={'field': 'normalized_total_cases', 'transform': color_mapper}, line_color='black', line_width=0.35, fill_alpha=1, hover_fill_color="#fec44f")
+    geoPlot.add_layout(color_bar, 'below')
+    geoPlot.axis.visible = False
+    # geoPlot.xgrid.grid_line_color = None
+    # geoPlot.ygrid.grid_line_color = None
+    patch = geoPlot.patches(xs="xs", ys="ys", source=source,
+                            fill_color={'field': 'normalized_total_cases', 'transform': color_mapper}, line_color='black', line_width=0.35, fill_alpha=1, hover_fill_color="#fec44f")
 
-    plot.add_tools(HoverTool(tooltips=[('Country', '@country'), ('Total Cases',
-                                                                 '@total_cases_formatted'), ('Total Deaths', '@total_deaths_formatted')], renderers=[patch]))
-    plot.title.text = 'Total Cases Plot'
+    geoPlot.add_tools(HoverTool(tooltips=[('Country', '@country'), ('Total Cases',
+                                                                    '@total_cases_formatted'), ('Total Deaths', '@total_deaths_formatted')], renderers=[patch]))
+    geoPlot.title.text = 'Total Cases Plot'
 
 
 def generatePatchBasedOnSelect(selectValue):
     if selectValue == 'Total Cases':
-        return plot.patches(xs="xs", ys="ys", source=source,
-                            fill_color={'field': 'normalized_total_cases', 'transform': color_mapper}, line_color='black', line_width=0.35, fill_alpha=1, hover_fill_color="#fec44f")
+        return geoPlot.patches(xs="xs", ys="ys", source=source,
+                               fill_color={'field': 'normalized_total_cases', 'transform': color_mapper}, line_color='black', line_width=0.35, fill_alpha=1, hover_fill_color="#fec44f")
     elif selectValue == 'Total Deaths':
-        return plot.patches(xs="xs", ys="ys", source=source,
-                            fill_color={'field': 'normalized_total_deaths', 'transform': color_mapper}, line_color='black', line_width=0.35, fill_alpha=1, hover_fill_color="#fec44f")
+        return geoPlot.patches(xs="xs", ys="ys", source=source,
+                               fill_color={'field': 'normalized_total_deaths', 'transform': color_mapper}, line_color='black', line_width=0.35, fill_alpha=1, hover_fill_color="#fec44f")
     elif selectValue == 'Total Cases Per Million':
-        return plot.patches(xs="xs", ys="ys", source=source,
-                            fill_color={'field': 'normalized_total_cases_per_million', 'transform': color_mapper}, line_color='black', line_width=0.35, fill_alpha=1, hover_fill_color="#fec44f")
+        return geoPlot.patches(xs="xs", ys="ys", source=source,
+                               fill_color={'field': 'normalized_total_cases_per_million', 'transform': color_mapper}, line_color='black', line_width=0.35, fill_alpha=1, hover_fill_color="#fec44f")
     elif selectValue == 'Total Deaths Per Million':
-        return plot.patches(xs="xs", ys="ys", source=source,
-                            fill_color={'field': 'normalized_total_deaths_per_million', 'transform': color_mapper}, line_color='black', line_width=0.35, fill_alpha=1, hover_fill_color="#fec44f")
+        return geoPlot.patches(xs="xs", ys="ys", source=source,
+                               fill_color={'field': 'normalized_total_deaths_per_million', 'transform': color_mapper}, line_color='black', line_width=0.35, fill_alpha=1, hover_fill_color="#fec44f")
 
 
 def findCountry(coord):
     country = Nominatim(user_agent="geoapiExercises",
-                     ssl_context=ssl.SSLContext()).reverse(coord, exactly_one=True).raw['address'].get('country', '')
+                        ssl_context=ssl.SSLContext()).reverse(coord, exactly_one=True).raw['address'].get('country', '')
     print(country)
     if country == 'Россия':
         return 'Russia'
@@ -159,34 +161,39 @@ def findCountry(coord):
         return 'Algeria'
     elif country == 'Deutschland':
         return 'Germany'
+    elif country == 'Libya / ليبيا':
+        return 'Libya'
+    elif country == 'Česká republika':
+        return 'Slovakia'
     return country
-
-
-def handleTap(model):
-    country = findCountry((model.y, model.x))
-
-    selectedCountryIsoCode = geoDataFrame[geoDataFrame['country']
-                                          == country]['iso_code'].values[0]
-    print(selectedCountryIsoCode)
-    return selectedCountryIsoCode
 
 
 def handleSelectorChange(attrname, old, new):
     print(attrname, old, new)
     patch = generatePatchBasedOnSelect(selector.value)
-    plot.add_tools(HoverTool(tooltips=[('Country', '@country'), ('Total Cases',
-                                                                 '@total_cases_formatted'), ('Total Deaths', '@total_deaths_formatted')], renderers=[patch]))
-    plot.title.text = '%s Plot' % (selector.value)
+    geoPlot.add_tools(HoverTool(tooltips=[('Country', '@country'), ('Total Cases',
+                                                                    '@total_cases_formatted'), ('Total Deaths', '@total_deaths_formatted')], renderers=[patch]))
+    geoPlot.title.text = '%s Plot' % (selector.value)
+
+
+def handleTap(model):
+    country = findCountry((model.y, model.x))
+    selectedCountryIsoCode = geoDataFrame[geoDataFrame['country']
+                                          == country]['iso_code'].values[0]
+
+    # TODO: change line plot and bar plot here                                          
+    print(selectedCountryIsoCode)
+    return selectedCountryIsoCode
 
 
 selectOptions = ['Total Cases', 'Total Deaths',
                  'Total Cases Per Million', 'Total Deaths Per Million']
 selector = Select(value=selectOptions[0], options=selectOptions)
 selector.on_change('value', handleSelectorChange)
-plot.on_event(Tap, handleTap)
+geoPlot.on_event(Tap, handleTap)
 
-# initialize the plot
+# initialize the geoPlot
 init()
 
-layout = column(selector, plot)
+layout = column(row(column(selector, geoPlot), linePlot), row(barPlot))
 curdoc().add_root(layout)
