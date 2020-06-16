@@ -27,7 +27,7 @@ def cleanDataFrame_continentalVis(dataFrameRef):
     # Add new Year/Month Col and formatted the Year-Month-Day date field to Year/Month
     dataFrameRef['Year/Month'] = pandaRef.to_datetime(dataFrameRef['date']).apply(lambda x: '{year}/{month}'.format(year=x.year, month=x.month))
     # sort by date in descending
-    dataFrameRef = dataFrameRef.sort_values(by='date', ascending=False)
+    dataFrameRef = dataFrameRef.sort_values(by='date', ascending=True)
 
     dataFrameRef = dataFrameRef[['Year/Month', 'continent', 'location', 'total_cases', 'total_deaths', 'population']]
     return dataFrameRef
