@@ -190,3 +190,44 @@ init()
 
 layout = column(selector, plot)
 curdoc().add_root(layout)
+
+
+############################################################################
+# Sachin Code impplementation
+
+import pandas as pandaRef
+
+#Copy of the dataFrame
+dataFrameRef=datasetRaw
+
+
+def cleanDataFrame_Country(dataFrameRef, countryCode):
+    
+    # drop World data and drop iso_code with NaN values
+    dataFrameRef = dataFrameRef[dataFrameRef.iso_code != 'OWID_WRL']
+
+    # Add new Year/Month Col and formatted the Year-Month-Day date field to Year/Month
+    dataFrameRef['Year/Month'] = pandaRef.to_datetime(dataFrameRef['date']).apply(lambda x: '{year}/{month}'.format(year=x.year, month=x.month))
+    # sort by date in descending
+    dataFrameRef = dataFrameRef.sort_values(by='date', ascending=True)
+
+    # select unique country values (as data is sorted in descending based on date and head 1 will give the most recent record of a country)
+    uniqueDataFrame = dataFrameRef.groupby(['iso_code'], as_index=False).tail(1)
+
+    #print(uniqueDataFrame)
+
+    # sort by date in descending
+    #uniqueDataFrame = uniqueDataFrame.sort_values(by='total_cases', ascending=False)
+    #uniqueDataFrame = uniqueDataFrame.head(20)
+
+    #top20country = uniqueDataFrame['location']
+
+    
+    countryDataFrame = dataFrameRef[dataFrameRef.iso_code == countryCode]
+    print(countryDataFrame)
+    return countryDataFrame
+
+
+countryDataFrame = cleanDataFrame_Country(dataFrameRef, selectedCountryIsoCode)
+
+
