@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.5.23)  12 JUN 2020 22:51
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.5.23)  16 JUN 2020 17:45
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -201,25 +201,30 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <6> on input line 43.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 67.
+(Font)              <7> on input line 66.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 67.
-LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 163.
+(Font)              <5> on input line 66.
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 162.
  (/usr/local/texlive/2020/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 ) [1
 
-{/usr/local/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2] [3] (/Users/ramuramasamy/UPB/IDV/Assignments/IDVAssign5/concept/main.aux) ) 
+{/usr/local/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2]
+Overfull \hbox (27.326pt too wide) in paragraph at lines 180--181
+[]\T1/ptm/b/n/10 Geospatial Vi-su-al-iza-tion: \T1/ptm/m/n/10 A choro-pleth world map that dif-fer-en-ti-ates the cases reported/fatalities/case-per-million/deaths-
+ []
+
+[3] (/Users/ramuramasamy/UPB/IDV/Assignments/IDVAssign5/concept/main.aux) ) 
 Here is how much of TeX's memory you used:
  3256 strings out of 480608
  44712 string characters out of 5903630
- 315531 words of memory out of 5000000
+ 316531 words of memory out of 5000000
  19119 multiletter control sequences out of 15000+600000
  555493 words of font info for 49 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 30i,10n,37p,650b,243s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 30i,10n,37p,674b,243s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/texlive/2020/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on /Users/ramuramasamy/UPB/IDV/Assignments/IDVAssign5/concept/main.pdf (3 pages, 44213 bytes).
+Output written on /Users/ramuramasamy/UPB/IDV/Assignments/IDVAssign5/concept/main.pdf (3 pages, 47697 bytes).
 PDF statistics:
  27 PDF objects out of 1000 (max. 8388607)
  18 compressed objects within 1 object stream

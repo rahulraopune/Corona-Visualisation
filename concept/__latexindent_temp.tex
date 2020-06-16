@@ -173,12 +173,12 @@ Probable target users:
 \end{itemize}
 
 
-\section{Visualization Technique}
+\section{Visulization Technique}
 \begin{itemize}
-    \item \textbf{Time Visualization:} A Time-Bar-Chart which compares country/continent versus cases/fatalities reported taking into account the time-oriented data(year/month/day), each bar combines time-series information with respect to day/month.
-    \item \textbf{Parallel Coordinates:} The visualization of the dataset can be done by grouping the top 10 affected countries together and then compare against each other, the various factors like deaths, active cases, hospital beds and more in order to get an idea of how each country fares in comparison with the others.
-    \item \textbf{Geospatial Visualization:} A choropleth world map that differentiates the cases reported/fatalities/case-per-million/deaths-per-million using brightness as a visual variable based on locations and their associated data values.
-    \item \textbf{Line-based Technique for Multivariate Data:} 
+    \item \textbf{Stacked Bar Chart:} Combining more then bar chart on top of each other for expanded viewing and visualisation, we make use of Stacked Bar Charts. Here, we take the population of the top 10 most affected countries in millions and then report the number of cases per million in each of these countries by Stacked Bar charts. We can also develop a strategy to visualise the number of hospital beds available to the number of beds occupied for these countries.
+    \item \textbf{Parallel Coordinates:} The visualisation of the dataset can be done by grouping the top 10 affected countries together and then compare against each other, the various factors like deaths, active cases, hospital beds etc. to get an idea of how each country fares in comparison with the others.
+    \item \textbf{GeoSpatial Plotting using Chloropleth Maps:} The earth with the various countries or the geographical areas are visualised which shows the intensity of values on equidistant rectangular projection of world Map which ca use various visual variables like color, texture, brightness etc. In our case pertaining to COVID19 we are using a mapping of the logarithm of the total count to the respective country using the colour to mark the intensity of value.
+    \item \textbf{Superimposed line plotting:} This type of plotting is generally used to show the single dimensional values i.e one value per data item with respect to change in time.In case of superimposed line plotting multiple variables are plotted together with respect to time and in our case of COVID19 we are plotting profile line of the daily logarithmic total counts the top 10 countries having maximum cases of COVID19 differentiated with different colours on Y axis so that its easier to visualise the rise and drop of different cases on a daily or a monthly basis on the X axis.
 \end{itemize}
 
 
