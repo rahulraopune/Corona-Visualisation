@@ -150,22 +150,8 @@ def generatePatchBasedOnSelect(selectValue):
 
 
 def findCountry(coord):
-    country = Nominatim(user_agent="geoapiExercises",
-                        ssl_context=ssl.SSLContext()).reverse(coord, exactly_one=True).raw['address'].get('country', '')
-    print(country)
-    if country == 'Россия':
-        return 'Russia'
-    elif country == 'China 中国':
-        return 'China'
-    elif country == 'الجزائر':
-        return 'Algeria'
-    elif country == 'Deutschland':
-        return 'Germany'
-    elif country == 'Libya / ليبيا':
-        return 'Libya'
-    elif country == 'Česká republika':
-        return 'Slovakia'
-    return country
+    return Nominatim(user_agent="geoapiExercises",
+                        ssl_context=ssl.SSLContext()).reverse(coord, exactly_one=True, language='en').raw['address'].get('country', '')
 
 
 def handleSelectorChange(attrname, old, new):
@@ -180,10 +166,9 @@ def handleTap(model):
     country = findCountry((model.y, model.x))
     selectedCountryIsoCode = geoDataFrame[geoDataFrame['country']
                                           == country]['iso_code'].values[0]
-
     # TODO: change line plot and bar plot here                                          
     print(selectedCountryIsoCode)
-    return selectedCountryIsoCode
+    
 
 
 selectOptions = ['Total Cases', 'Total Deaths',
