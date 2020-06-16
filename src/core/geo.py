@@ -24,6 +24,7 @@ geoDataFrame.columns = ['country', 'country_code', 'geometry']
 # print(geoDataFrame[geoDataFrame['country'] == 'Antarctica'])
 geoDataFrame = geoDataFrame.drop(geoDataFrame.index[159])
 geoDataFrame.head()
+selectedCountryIsoCode = 'IND'
 
 
 # COVID-19 dataset
@@ -147,19 +148,22 @@ def generatePatchBasedOnSelect(selectValue):
 
 
 def findCountry(coord):
-    return Nominatim(user_agent="geoapiExercises",
+    country = Nominatim(user_agent="geoapiExercises",
                      ssl_context=ssl.SSLContext()).reverse(coord, exactly_one=True).raw['address'].get('country', '')
+    print(country)
+    if country == 'Россия':
+        return 'Russia'
+    elif country == 'China 中国':
+        return 'China'
+    elif country == 'الجزائر':
+        return 'Algeria'
+    elif country == 'Deutschland':
+        return 'Germany'
+    return country
 
 
 def handleTap(model):
     country = findCountry((model.y, model.x))
-    print(country)
-    if country == 'Россия':
-        country = 'Russia'
-    elif country == 'China 中国':
-        country = 'China'
-    elif country == 'الجزائر':
-        country = 'Algeria'
 
     selectedCountryIsoCode = geoDataFrame[geoDataFrame['country']
                                           == country]['iso_code'].values[0]
