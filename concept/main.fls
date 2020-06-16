@@ -1,9 +1,9 @@
-PWD /Users/ramuramasamy/UPB/IDV/Assignments/IDVAssign5/concept
+PWD /Users/sachinsudhakarshetty/GermanStudy/IDV/Assignment5/IDVAssign5/concept
 INPUT /usr/local/texlive/2020/texmf.cnf
 INPUT /usr/local/texlive/2020/texmf-dist/web2c/texmf.cnf
 INPUT /usr/local/texlive/2020/texmf-var/web2c/pdftex/pdflatex.fmt
-INPUT /Users/ramuramasamy/UPB/IDV/Assignments/IDVAssign5/concept/main.tex
-OUTPUT /Users/ramuramasamy/UPB/IDV/Assignments/IDVAssign5/concept/main.log
+INPUT /Users/sachinsudhakarshetty/GermanStudy/IDV/Assignment5/IDVAssign5/concept/main.tex
+OUTPUT /Users/sachinsudhakarshetty/GermanStudy/IDV/Assignment5/IDVAssign5/concept/main.log
 INPUT /usr/local/texlive/2020/texmf-dist/tex/latex/base/article.cls
 INPUT /usr/local/texlive/2020/texmf-dist/tex/latex/base/article.cls
 INPUT /usr/local/texlive/2020/texmf-dist/tex/latex/base/size10.clo
@@ -51,9 +51,9 @@ INPUT /usr/local/texlive/2020/texmf-dist/tex/latex/graphics-cfg/color.cfg
 INPUT /usr/local/texlive/2020/texmf-dist/tex/latex/graphics-cfg/color.cfg
 INPUT /usr/local/texlive/2020/texmf-dist/tex/latex/l3backend/l3backend-pdfmode.def
 INPUT /usr/local/texlive/2020/texmf-dist/tex/latex/l3backend/l3backend-pdfmode.def
-INPUT /Users/ramuramasamy/UPB/IDV/Assignments/IDVAssign5/concept/main.aux
-INPUT /Users/ramuramasamy/UPB/IDV/Assignments/IDVAssign5/concept/main.aux
-OUTPUT /Users/ramuramasamy/UPB/IDV/Assignments/IDVAssign5/concept/main.aux
+INPUT /Users/sachinsudhakarshetty/GermanStudy/IDV/Assignment5/IDVAssign5/concept/main.aux
+INPUT /Users/sachinsudhakarshetty/GermanStudy/IDV/Assignment5/IDVAssign5/concept/main.aux
+OUTPUT /Users/sachinsudhakarshetty/GermanStudy/IDV/Assignment5/IDVAssign5/concept/main.aux
 INPUT /usr/local/texlive/2020/texmf-dist/tex/latex/psnfss/t1ptm.fd
 INPUT /usr/local/texlive/2020/texmf-dist/tex/latex/psnfss/t1ptm.fd
 INPUT /usr/local/texlive/2020/texmf-dist/fonts/tfm/adobe/times/ptmr8t.tfm
@@ -81,7 +81,7 @@ INPUT /usr/local/texlive/2020/texmf-dist/fonts/tfm/adobe/times/ptmri8t.tfm
 INPUT /usr/local/texlive/2020/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 INPUT /usr/local/texlive/2020/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 INPUT /usr/local/texlive/2020/texmf-dist/fonts/tfm/adobe/times/ptmr8c.tfm
-OUTPUT /Users/ramuramasamy/UPB/IDV/Assignments/IDVAssign5/concept/main.pdf
+OUTPUT /Users/sachinsudhakarshetty/GermanStudy/IDV/Assignment5/IDVAssign5/concept/main.pdf
 INPUT /usr/local/texlive/2020/texmf-dist/fonts/vf/adobe/times/ptmr8t.vf
 INPUT /usr/local/texlive/2020/texmf-dist/fonts/tfm/adobe/times/ptmr8r.tfm
 INPUT /usr/local/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map
@@ -98,7 +98,7 @@ INPUT /usr/local/texlive/2020/texmf-dist/fonts/tfm/adobe/times/ptmb8r.tfm
 INPUT /usr/local/texlive/2020/texmf-dist/fonts/vf/adobe/times/ptmri8t.vf
 INPUT /usr/local/texlive/2020/texmf-dist/fonts/tfm/adobe/times/ptmri8r.tfm
 INPUT /usr/local/texlive/2020/texmf-dist/fonts/vf/adobe/times/ptmr8c.vf
-INPUT /Users/ramuramasamy/UPB/IDV/Assignments/IDVAssign5/concept/main.aux
+INPUT /Users/sachinsudhakarshetty/GermanStudy/IDV/Assignment5/IDVAssign5/concept/main.aux
 INPUT /usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/base/8r.enc
 INPUT /usr/local/texlive/2020/texmf-dist/fonts/type1/urw/times/utmb8a.pfb
 INPUT /usr/local/texlive/2020/texmf-dist/fonts/type1/urw/times/utmr8a.pfb

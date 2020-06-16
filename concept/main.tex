@@ -80,6 +80,44 @@ The dataset characteristics are described in the Table \ref{tab:data_chars}. The
 	\label{tab:data_sources}
 \end{table}
 
+
+
+
+\section{User and Task}
+The owid-covid-19-data dataset captures information of disease spread and fatalities caused around the globe and also counter measure like testing taken by respective countries.\newline
+Tasks for the Visualization can be as follows:
+\begin{itemize}
+    \item Visualization of disease information country-wise taking into account of multivariate data like infected cases, fatality count, total cases and total deaths per million.
+    \item Visualization by comparison of the total cases and fatalities by nations monthly.
+    \item Visualization of increasing or decreasing trends of total cases/total deaths of the selected nations.
+    \item Visualization of total cases/fatalities per million for each country.
+\end{itemize}
+Probable target users:
+\begin{itemize}
+    \item General public can get to know the statistics of COVID-19 over the globe. 
+    \item WHO and independent government bodies of countries can make use of the visualizations for better planning of the medical infrastructure. 
+    \item Monetary Institution like: World Bank can estimate the impact of the losses particular to a region and aid respectively.
+    \item Travel and Tourism industry and service providing organization can utilize these visualizations for better trip planning.
+\end{itemize}
+
+
+\section{Visualization Technique}
+Visualization by multiple visulization technique interconnected by user interaction. Geospatial visualization will act as the root of the other visulization techniques. 
+\begin{itemize}
+    \item \textbf{Geospatial Visualization:} A choropleth world map that differentiates cases-reported/fatalities/case-per-million/deaths-per-million using brightness as a visual variable based on locations and their associated data values.
+    \item \textbf{Time Visualization:} A bar-chart which compares the cases-reported/fatalities/case-per-million/deaths-per-million with respect to time-oriented data(montly) along x-axes, for selected country in the choropleth map.
+     \item \textbf{Line-based Technique for uni-variate Data:} A line plot showing the increase or decresing trend for the selected country and associated univariate data.
+\end{itemize}
+
+
+\section{Interaction}
+\begin{itemize}
+    \item \textbf{Interaction Operands - Screen Space:} On hovering on the choropleth map region particular to a country, multivariate data associated with the region is displayed as a playcard.
+    \item \textbf{Interaction Operators - Connection Operators:} On-click event on the region (country) in the choropleth map, corresponding data values are mapped to other visulization techniques providing different views in the same page.
+    \item \textbf{Interaction Operators - Selection:} A drop down menu will be provided to the user, where the user can select the data to visualize in the choropleth world map.
+\end{itemize}
+%\label{sec:First_Section}
+
 \begin{table}[htbp]
     \centering
 	\begin{tabular}{|l|l|p{8cm}|}
@@ -152,45 +190,6 @@ The dataset characteristics are described in the Table \ref{tab:data_chars}. The
 	\caption{Data Characteristics}
 	\label{tab:data_chars}
 \end{table}
-
-
-
-\section{User and Task}
-The owid-covid-19-data dataset captures information of disease spread and fatalities caused around the globe and also counter measure like testing taken by respective countries.\newline
-Tasks for the Visualization can be as follows:
-\begin{itemize}
-    \item Visualization of disease information country-wise taking into account of multivariate data like infected cases, fatality count, total cases and total deaths per million.
-    \item Visualization by comparison of the total cases and fatalities reported daily among the continents and top nations.
-    \item Visualization by comparison of multivariate data for each country/countries. For example: total cases vs total deaths.
-    \item Visualization of increasing or decreasing trends of total cases/total deaths of top nations.
-\end{itemize}
-Probable target users:
-\begin{itemize}
-    \item General public can get to know the statistics of COVID-19 over the globe. 
-    \item WHO and independent government bodies of countries can make use of the visualizations for better planning of the medical infrastructure. 
-    \item Monetary Institution like: World Bank can estimate the impact of the losses particular to a region and aid respectively.
-    \item Travel and Tourism industry and service providing organization can utilize these visualizations for better trip planning.
-\end{itemize}
-
-
-\section{Visualization Technique}
-\begin{itemize}
-    \item \textbf{Time Visualization:} A Time-Bar-Chart which compares country/continent versus cases/fatalities reported taking into account the time-oriented data(year/month/day), each bar combines time-series information with respect to day/month.
-    \item \textbf{Parallel Coordinates:} The visualization of the dataset can be done by grouping the top 10 affected countries together and then compare against each other, the various factors like deaths, active cases, hospital beds and more in order to get an idea of how each country fares in comparison with the others.
-    \item \textbf{Geospatial Visualization:} A choropleth world map that differentiates the cases reported/fatalities/case-per-million/deaths-per-million using brightness as a visual variable based on locations and their associated data values.
-    \item \textbf{Line-based Technique for Multivariate Data:} 
-\end{itemize}
-
-
-\section{Interaction}
-\begin{itemize}
-    \item \textbf{Selection:}Users can select a region on the stacked bar chart and display the information of the total number of cases versus continents and focus on the subset of relevant data that has to be acquired in detail by selection and elaboration operators by a pop-up which highlights the total number of cases from each continent.   
-    \item \textbf{Filters:} Users can focus only on the subset of data by applying filters on the COVID-19 related information to reduce the abstraction due to multiple number of lines which are projected in parallel co-ordinates by setting the range constraints which only selects the relevant information required for the users.
-    \item \textbf{GeoSpatial Selection:}Users are able to view the COVID-19 related multivariate information such as country, total number of cases, total number of deaths by hovering over a particular region in the Choropleth Map and using the dropdown option to change the colormap of the visualization based on the selected input and also interact with scatterplots to view details of the desired location.
-\end{itemize}
-%\label{sec:First_Section}
-
-....
 
 
 
