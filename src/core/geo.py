@@ -12,9 +12,11 @@ from bokeh.io import show, curdoc
 from bokeh.plotting import figure
 from bokeh.models import GeoJSONDataSource, LinearColorMapper, HoverTool, ColorBar, Select, ColumnDataSource
 from bokeh.layouts import row, column
-from bokeh.palettes import brewer, Spectral5
+from bokeh.palettes import brewer, Spectral5, Category20c
 from bokeh.events import Tap
 from geopy.geocoders import Nominatim
+from bokeh.transform import cumsum
+from math import pi
 
 PALETTE_SIZE = 8
 
@@ -117,14 +119,18 @@ color_mapper = LinearColorMapper(palette=palette, low=0, high=8)
 color_bar = ColorBar(color_mapper=color_mapper, label_standoff=8, width=500, height=20,
                      border_line_color=None, location=(0, 0), orientation='horizontal')
 
-geoPlot = figure(plot_height=600, plot_width=1000,
-                 tools="pan,wheel_zoom,reset,hover,save")
-linePlot = figure(plot_height=600, plot_width=600)
-barPlot = figure(plot_height=600, plot_width=1200)
+geoPlot = figure(plot_height=600, plot_width=1000)
 
-months = ['2019/12','2020/1','2020/2','2020/3','2020/4','2020/5','2020/6']
-barPlot = figure(plot_height=600, plot_width=1200, x_range=months, title="Fruit Counts",
-        toolbar_location=None, tools="")
+# TODO: modify according to line --> RAHUL
+linePlot = figure(plot_height=600, plot_width=600)
+
+months = ['2019/12', '2020/1', '2020/2',
+          '2020/3', '2020/4', '2020/5', '2020/6']
+barPlot = figure(plot_height=600, plot_width=1200, x_range=months, title="Country",
+                 toolbar_location=None)
+piePlot = figure(plot_height=600, plot_width=600,
+                 title="Pie Chart", x_range=(-0.5, 1.0))
+
 
 def init():
     geoPlot.add_layout(color_bar, 'below')
@@ -156,7 +162,7 @@ def generatePatchBasedOnSelect(selectValue):
 
 def findCountry(coord):
     return Nominatim(user_agent="geoapiExercises",
-                        ssl_context=ssl.SSLContext()).reverse(coord, exactly_one=True, language='en').raw['address'].get('country', '')
+                     ssl_context=ssl.SSLContext()).reverse(coord, exactly_one=True, language='en').raw['address'].get('country', '')
 
 
 def handleSelectorChange(attrname, old, new):
@@ -173,15 +179,8 @@ def handleSelectorChange(attrname, old, new):
 # Sachin Code impplementation
 
 
-# Copy of the dataFrame
-dataFrameRef = datasetRaw
-
-
-def cleanDataFrame_Country(dataFrameRef, countryCode):
-
-    # drop World data and drop iso_code with NaN values
-    dataFrameRef = dataFrameRef[dataFrameRef.iso_code != 'OWID_WRL']
-
+def cleanDataFrameCountry(countryCode):
+    dataFrameRef = datasetRaw
     # Add new Year/Month Col and formatted the Year-Month-Day date field to Year/Month
     dataFrameRef['YearMonth'] = pandaRef.to_datetime(dataFrameRef['date']).apply(
         lambda x: '{year}/{month}'.format(year=x.year, month=x.month))
@@ -201,38 +200,37 @@ def cleanDataFrame_Country(dataFrameRef, countryCode):
     #top20country = uniqueDataFrame['location']
 
     countryDataFrame = dataFrameRef[dataFrameRef.iso_code == countryCode]
-    #print(countryDataFrame)
     return countryDataFrame
+
 ############################################################################
 
-#countryDataFrame = cleanDataFrame_Country(dataFrameRef, selectedCountryIsoCode)
 
-
-#barPlot.quad(source = countryDataFrame, bottom=0, top=countryDataFrame['total_cases'], right=countryDataFrame['Year/Month'], fill_color='red', line_color='black')
-
-def bar_subplotcountry(countryDataFrame):
-    print("Helo")
+def barPlotCountryTotalCases(isoCode, countryName):
+    countryDataFrame = cleanDataFrameCountry(isoCode)
     group = countryDataFrame.groupby('YearMonth', as_index=False).sum()
-    print(group['YearMonth'].values)
-    print(group['total_cases'].values)
-    #index_cmap = factor_cmap('YearMonth', palette=Spectral5, factors=sorted(countryDataFrame.YearMonth.unique()), end=1)
-    #barPlot.vbar(x=['a', 'b', 'c', 'd'], width=1, top=[0, 30, 467, 33527],
-     #            line_color="white")
-
-    #barPlot.y_range.start = 0
-    #barPlot.x_range.range_padding = 0.05
-    #barPlot.xgrid.grid_line_color = None
-    ##barPlot.xaxis.axis_label = "Manufacturer grouped by # Cylinders"
-    #barPlot.xaxis.major_label_orientation = 1.2
-    #barPlot.outline_line_color = None
-    
-
     barPlot.vbar(x=months, top=group['total_cases'].values, width=0.9)
-
+    barPlot.title.text = 'Total Cases - %s' % (countryName)
     barPlot.xgrid.grid_line_color = None
     barPlot.y_range.start = 0
 
-    
+
+def piePlotForCountry(isoCode, countryName):
+    countryDataFrame = cleanDataFrameCountry(isoCode).tail(1)
+    # selectionJson = countryDataFrame[[
+    #     'population', 'total_cases', 'total_deaths']].to_json(orient='records')
+    #     # .iloc[0].values
+    #     # 
+    # selectionJson = json.dumps(selectionJson)
+    # data = pd.Series(selectionJson).reset_index(
+    #     name='value').rename(columns={'index': 'country'})
+
+    # print(data['value'].values)
+    # data['angle'] = data['value']/data['value'].sum() * 2*pi
+    # data['color'] = Category20c[len(selectionJson)]
+    # piePlot.wedge(x=0, y=1, radius=0.4,
+    #               start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
+    #               line_color="white", fill_color='color', legend='country', source=data)
+    piePlot.title.text = 'COVID-19 Distribution - %s' % (countryName)
 
 
 def handleTap(model):
@@ -240,14 +238,10 @@ def handleTap(model):
     selectedCountryIsoCode = geoDataFrame[geoDataFrame['country']
                                           == country]['iso_code'].values[0]
     # TODO: change line plot and bar plot here
-    countryDataFrame = cleanDataFrame_Country(
-        dataFrameRef, selectedCountryIsoCode)
-    bar_subplotcountry(countryDataFrame)
-    #linePlot.quad(bottom=0, top=countryDataFrame['total_cases'], right=countryDataFrame['Year/Month'], fill_color='red', line_color='black')
-    # TODO: change line plot and bar plot here                                          
+    barPlotCountryTotalCases(selectedCountryIsoCode, country)
+    piePlotForCountry(selectedCountryIsoCode, country)
 
-    print(selectedCountryIsoCode)
-    
+    # print(selectedCountryIsoCode)
 
 
 selectOptions = ['Total Cases', 'Total Deaths',
@@ -259,6 +253,6 @@ geoPlot.on_event(Tap, handleTap)
 # initialize the geoPlot
 init()
 
-layout = column(row(column(selector, geoPlot), linePlot), row(barPlot))
+layout = column(row(column(selector, geoPlot), linePlot),
+                row(barPlot, piePlot))
 curdoc().add_root(layout)
-
