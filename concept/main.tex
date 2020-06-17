@@ -12,6 +12,7 @@
 \usepackage{graphicx}
 \usepackage{paralist}
 \usepackage{xcolor}
+\usepackage{hyperref}
 % \usepackage{fancyhdr}
 
 \geometry{verbose,paperwidth=21cm,paperheight=29.7cm}
@@ -57,7 +58,7 @@ At present, where University, Organization, Institution, Restaurant and many mor
 
 \section{Data Characteristics}
 
-The dataset characteristics are described in the Table \ref{tab:data_chars}. The dataset \textit{owid-covid-data.csv} is comprised of the dataset sources listed in the Table \ref{tab:data_sources} and is available as comma separated strings. The dataset contains 22,873 records and 33 columns (on June 12, 2020). Also, dataset containing the polygons, used to form a World Map for representing geo spatial mapping information is sourced from Natural Earth (Admin-0 Countries). 
+The dataset characteristics are described in the Table \ref{tab:data_chars}. The dataset \textit{owid-covid-data.csv} is sourced by \href{https://ourworldindata.org/coronavirus-testing}{Our World in Data}. It is comprised of the dataset sources listed in the Table \ref{tab:data_sources} and is available as comma separated strings. The dataset contains 22,873 records and 33 columns (on June 12, 2020). This dataset has all the information required to map data values of COVID-19 to a choropleth map and other interconnected visualizations. The fields that we are planning to use are highlighted in the Table \ref{tab:data_chars}. Also, dataset containing the polygons, used to form a World Map for representing geo spatial mapping information is sourced from \href{https://www.naturalearthdata.com/downloads/110m-cultural-vectors/110m-admin-0-countries/}{Natural Earth (Admin-0 Countries)}. 
 
 % that include European Centre for Disease Prevention and Control, National government reports, United Nations, Department of Economic and Social Affairs, Population Division, World Population Prospects: The 2019 Revision, World Bank – World Development Indicators, sourced from Food and Agriculture Organization and World Bank estimates, UN Population Division, World Population Prospects, 2017 Revision, United Nations Statistics Division, and OECD, Eurostat, World Bank, national government records and other sources.
 
@@ -127,29 +128,29 @@ Visualization by multiple visulization technique interconnected by user interact
 		\hline
 		\textbf{Data} & \textbf{Data Type} & \textbf{Description} \\
         \hline \hline
-        iso\_code & String & ISO 3166-1 alpha-3 (3 letter country codes) \\
+        \textbf{iso\_code} & String & ISO 3166-1 alpha-3 (3 letter country codes) \\
         \hline
-        continent & String & Continent name \\
+        \textbf{continent} & String & Continent name \\
         \hline
-        location & String & Country name \\
+        \textbf{location} & String & Country name \\
         \hline
-        date & String & Date of observation \\
+        \textbf{date} & String & Date of observation \\
         \hline
-        total\_cases & int64 & Total confirmed cases of COVID-19 \\
+        \textbf{total\_cases} & int64 & Total confirmed cases of COVID-19 \\
         \hline
-        new\_cases & int64 & New confirmed cases  \\
+        \textbf{new\_cases} & int64 & New confirmed cases  \\
         \hline
-        total\_deaths & int64 & Total deaths attributed \\
+        \textbf{total\_deaths} & int64 & Total deaths attributed \\
         \hline
-        new\_deaths & int64 & New deaths \\
+        \textbf{new\_deaths} & int64 & New deaths \\
         \hline
-        total\_cases\_per\_million & float64 & Total confirmed cases per one million people \\
+        \textbf{total\_cases\_per\_million} & float64 & Total confirmed cases per one million people \\
         \hline
-        new\_cases\_per\_million & float64 & New confirmed cases per one million people  \\
+        \textbf{new\_cases\_per\_million} & float64 & New confirmed cases per one million people  \\
         \hline
-        total\_deaths\_per\_million & float64 & Total deaths per one million people \\
+        \textbf{total\_deaths\_per\_million} & float64 & Total deaths per one million people \\
         \hline
-        new\_deaths\_per\_million & float64 & New deaths per one million people \\
+        \textbf{new\_deaths\_per\_million} & float64 & New deaths per one million people \\
         \hline
         total\_tests & float64 & Total tests conducted \\
         \hline
