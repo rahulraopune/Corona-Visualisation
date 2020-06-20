@@ -5,20 +5,18 @@ import pandas as pd
 import random
 import geopandas as gpd
 import numpy as np
-import itertools
 import json
 import locale
 import ssl
 from os.path import dirname, join
 from bokeh.io import show, curdoc
 from bokeh.plotting import figure
-from bokeh.models import GeoJSONDataSource, LinearColorMapper, HoverTool, ColorBar, Select, ColumnDataSource, DatetimeTickFormatter, CustomJS
+from bokeh.models import GeoJSONDataSource, LinearColorMapper, HoverTool, ColorBar, Select, ColumnDataSource, DatetimeTickFormatter
 from bokeh.layouts import row, column
 from bokeh.palettes import brewer, Spectral5, Category20c
 from bokeh.events import Tap
 from geopy.geocoders import Nominatim
 from bokeh.transform import cumsum
-from math import pi
 
 PALETTE_SIZE = 8
 
@@ -280,7 +278,7 @@ def piePlotForCountry(isoCode, countryName):
 def handleTap(model):
     global selectedCountryName
     global selectedCountryIsoCode
-    
+
     selectedCountryName = findCountry((model.y, model.x))
     selectedCountryIsoCode = geoDataFrame[geoDataFrame['country']
                                           == selectedCountryName]['iso_code'].values[0]
@@ -293,15 +291,11 @@ def handleTap(model):
     # print(selectedCountryIsoCode)
 
 
-def handleReset(model):
-    CustomJS(args=dict(linePlot=linePlot), code="""p.reset.emit()""")
-
-
 selectOptions = ['Total Cases', 'Total Deaths',
                  'Total Cases Per Million', 'Total Deaths Per Million']
 selector = Select(value=selectOptions[0], options=selectOptions)
 selector.on_change('value', handleSelectorChange)
-geoPlot.on_event(Tap, handleTap, handleReset)
+geoPlot.on_event(Tap, handleTap)
 
 # initialize the geoPlot
 init()
