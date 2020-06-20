@@ -2,15 +2,17 @@ from bokeh.transform import factor_cmap
 import pandas as pandaRef
 import math
 import pandas as pd
+import random
 import geopandas as gpd
 import numpy as np
+import itertools
 import json
 import locale
 import ssl
 from os.path import dirname, join
 from bokeh.io import show, curdoc
 from bokeh.plotting import figure
-from bokeh.models import GeoJSONDataSource, LinearColorMapper, HoverTool, ColorBar, Select, ColumnDataSource
+from bokeh.models import GeoJSONDataSource, LinearColorMapper, HoverTool, ColorBar, Select, ColumnDataSource, DatetimeTickFormatter, CustomJS
 from bokeh.layouts import row, column
 from bokeh.palettes import brewer, Spectral5, Category20c
 from bokeh.events import Tap
@@ -122,11 +124,11 @@ color_bar = ColorBar(color_mapper=color_mapper, label_standoff=8, width=500, hei
 geoPlot = figure(plot_height=600, plot_width=1000)
 
 # TODO: modify according to line --> RAHUL
-linePlot = figure(plot_height=600, plot_width=600)
+linePlot = figure(plot_height=600, plot_width=800, x_axis_type="datetime", title="Country")
 
 months = ['2019/12', '2020/1', '2020/2',
           '2020/3', '2020/4', '2020/5', '2020/6']
-barPlot = figure(plot_height=600, plot_width=1200, x_range=months, title="Country",
+barPlot = figure(plot_height=600, plot_width=1200, x_range=months, title="Time Series Plot",
                  toolbar_location=None)
 piePlot = figure(plot_height=600, plot_width=600,
                  title="Pie Chart", x_range=(-0.5, 1.0))
@@ -202,8 +204,19 @@ def cleanDataFrameCountry(countryCode):
     countryDataFrame = dataFrameRef[dataFrameRef.iso_code == countryCode]
     return countryDataFrame
 
-############################################################################
 
+def linePlotCountryTotalCases(selectedCountryIsoCode, country, param = 'total_cases'):
+    countryDataFrame = cleanDataFrameCountry(selectedCountryIsoCode)
+    data = pd.pivot_table(countryDataFrame, index = 'date', columns = 'iso_code', values = param).reset_index()
+    linePlot.grid.grid_line_alpha = 0.1
+    linePlot.xaxis.axis_label = 'Date'
+    linePlot.yaxis.axis_label = param
+    linePlot.title.text = 'Timeseries %s Plot' % (selector.value)
+    linePlot.yaxis.formatter.use_scientific = False
+    linePlot.xaxis.formatter = DatetimeTickFormatter(hours=["%d %B %Y"],days=["%d %B %Y"],months=["%d %B %Y"],years=["%d %B %Y"])
+    linePlot.legend.location = 'top_left'
+    linePlot.line(np.array(data['date'], dtype=np.datetime64), data[selectedCountryIsoCode], color="cyan", legend_label=country, line_width=3)
+    
 
 def barPlotCountryTotalCases(isoCode, countryName):
     countryDataFrame = cleanDataFrameCountry(isoCode)
@@ -212,6 +225,7 @@ def barPlotCountryTotalCases(isoCode, countryName):
     barPlot.title.text = 'Total Cases - %s' % (countryName)
     barPlot.xgrid.grid_line_color = None
     barPlot.y_range.start = 0
+
 
 
 def piePlotForCountry(isoCode, countryName):
@@ -240,15 +254,17 @@ def handleTap(model):
     # TODO: change line plot and bar plot here
     barPlotCountryTotalCases(selectedCountryIsoCode, country)
     piePlotForCountry(selectedCountryIsoCode, country)
-
+    linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases')
     # print(selectedCountryIsoCode)
 
-
+def handleReset(model):
+    CustomJS(args=dict(linePlot=linePlot), code="""p.reset.emit()""")
+    
 selectOptions = ['Total Cases', 'Total Deaths',
                  'Total Cases Per Million', 'Total Deaths Per Million']
 selector = Select(value=selectOptions[0], options=selectOptions)
 selector.on_change('value', handleSelectorChange)
-geoPlot.on_event(Tap, handleTap)
+geoPlot.on_event(Tap, handleTap, handleReset)
 
 # initialize the geoPlot
 init()
