@@ -31,6 +31,7 @@ geoDataFrame.columns = ['country', 'country_code', 'geometry']
 geoDataFrame = geoDataFrame.drop(geoDataFrame.index[159])
 geoDataFrame.head()
 selectedCountryIsoCode = 'IND'
+selectedCountryName = 'India'
 
 
 # COVID-19 dataset
@@ -124,7 +125,8 @@ color_bar = ColorBar(color_mapper=color_mapper, label_standoff=8, width=500, hei
 geoPlot = figure(plot_height=600, plot_width=1000)
 
 # TODO: modify according to line --> RAHUL
-linePlot = figure(plot_height=600, plot_width=800, x_axis_type="datetime", title="Country")
+linePlot = figure(plot_height=600, plot_width=600,
+                  x_axis_type="datetime", title="Country")
 
 months = ['2019/12', '2020/1', '2020/2',
           '2020/3', '2020/4', '2020/5', '2020/6']
@@ -167,12 +169,25 @@ def findCountry(coord):
                      ssl_context=ssl.SSLContext()).reverse(coord, exactly_one=True, language='en').raw['address'].get('country', '')
 
 
+def getSelectorParam():
+    if selector.value == 'Total Cases':
+        return 'total_cases'
+    elif selector.value == 'Total Deaths':
+        return 'total_deaths'
+    elif selector.value == 'Total Cases Per Million':
+        return 'total_cases_per_million'
+    elif selector.value ==  'Total Deaths Per Million':
+        return 'total_deaths_per_million'
+
 def handleSelectorChange(attrname, old, new):
     print(attrname, old, new)
     patch = generatePatchBasedOnSelect(selector.value)
     geoPlot.add_tools(HoverTool(tooltips=[('Country', '@country'), ('Total Cases',
                                                                     '@total_cases_formatted'), ('Total Deaths', '@total_deaths_formatted')], renderers=[patch]))
     geoPlot.title.text = '%s Plot' % (selector.value)
+    
+    linePlotCountryTotalCases(selectedCountryIsoCode,
+                              selectedCountryName, param=getSelectorParam())
 
 
 ################################
@@ -205,18 +220,32 @@ def cleanDataFrameCountry(countryCode):
     return countryDataFrame
 
 
-def linePlotCountryTotalCases(selectedCountryIsoCode, country, param = 'total_cases'):
+def linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases'):
+    # clear line plot from current document
+    row1 = curdoc().get_model_by_name('row1')
+    row1Child = row1.children
+    linePlotLayout = curdoc().get_model_by_name('line_plot')
+    row1Child.remove(linePlotLayout)
+
+    linePlot = figure(plot_height=600, plot_width=600,
+                      x_axis_type="datetime", title="Country")
     countryDataFrame = cleanDataFrameCountry(selectedCountryIsoCode)
-    data = pd.pivot_table(countryDataFrame, index = 'date', columns = 'iso_code', values = param).reset_index()
+    data = pd.pivot_table(countryDataFrame, index='date',
+                          columns='iso_code', values=param).reset_index()
     linePlot.grid.grid_line_alpha = 0.1
     linePlot.xaxis.axis_label = 'Date'
     linePlot.yaxis.axis_label = param
-    linePlot.title.text = 'Timeseries %s Plot' % (selector.value)
+    linePlot.title.text = 'Timeseries %s Plot of %s' % (
+        selector.value, country)
     linePlot.yaxis.formatter.use_scientific = False
-    linePlot.xaxis.formatter = DatetimeTickFormatter(hours=["%d %B %Y"],days=["%d %B %Y"],months=["%d %B %Y"],years=["%d %B %Y"])
-    linePlot.legend.location = 'top_left'
-    linePlot.line(np.array(data['date'], dtype=np.datetime64), data[selectedCountryIsoCode], color="cyan", legend_label=country, line_width=3)
-    
+    linePlot.xaxis.formatter = DatetimeTickFormatter(
+        hours=["%d %B %Y"], days=["%d %B %Y"], months=["%d %B %Y"], years=["%d %B %Y"])
+    # linePlot.legend = False
+    linePlot.line(np.array(data['date'], dtype=np.datetime64),
+                  data[selectedCountryIsoCode], color="cyan", legend_label=country, line_width=3)
+    # add new line plot to current document
+    row1Child.append(row(linePlot, name='line_plot'))
+
 
 def barPlotCountryTotalCases(isoCode, countryName):
     countryDataFrame = cleanDataFrameCountry(isoCode)
@@ -227,13 +256,12 @@ def barPlotCountryTotalCases(isoCode, countryName):
     barPlot.y_range.start = 0
 
 
-
 def piePlotForCountry(isoCode, countryName):
     countryDataFrame = cleanDataFrameCountry(isoCode).tail(1)
     # selectionJson = countryDataFrame[[
     #     'population', 'total_cases', 'total_deaths']].to_json(orient='records')
     #     # .iloc[0].values
-    #     # 
+    #     #
     # selectionJson = json.dumps(selectionJson)
     # data = pd.Series(selectionJson).reset_index(
     #     name='value').rename(columns={'index': 'country'})
@@ -248,18 +276,22 @@ def piePlotForCountry(isoCode, countryName):
 
 
 def handleTap(model):
-    country = findCountry((model.y, model.x))
+    selectedCountryName = findCountry((model.y, model.x))
     selectedCountryIsoCode = geoDataFrame[geoDataFrame['country']
-                                          == country]['iso_code'].values[0]
+                                          == selectedCountryName]['iso_code'].values[0]
     # TODO: change line plot and bar plot here
-    barPlotCountryTotalCases(selectedCountryIsoCode, country)
-    piePlotForCountry(selectedCountryIsoCode, country)
-    linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases')
+    barPlotCountryTotalCases(selectedCountryIsoCode,
+                             selectedCountryName)
+    piePlotForCountry(selectedCountryIsoCode, selectedCountryName)
+    linePlotCountryTotalCases(selectedCountryIsoCode,
+                              selectedCountryName, getSelectorParam())
     # print(selectedCountryIsoCode)
+
 
 def handleReset(model):
     CustomJS(args=dict(linePlot=linePlot), code="""p.reset.emit()""")
-    
+
+
 selectOptions = ['Total Cases', 'Total Deaths',
                  'Total Cases Per Million', 'Total Deaths Per Million']
 selector = Select(value=selectOptions[0], options=selectOptions)
@@ -269,6 +301,6 @@ geoPlot.on_event(Tap, handleTap, handleReset)
 # initialize the geoPlot
 init()
 
-layout = column(row(column(selector, geoPlot), linePlot),
-                row(barPlot, piePlot))
+layout = column(row(column(selector, geoPlot), row(linePlot, name='line_plot'),
+                    name='row1'), row(barPlot, piePlot, name='row2'), name='mainLayout')
 curdoc().add_root(layout)
