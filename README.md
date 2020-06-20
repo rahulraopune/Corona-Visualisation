@@ -1,6 +1,10 @@
 # IDVAssign5
 IDVAssignment5
 
+#Execution Command
+
+bokeh serve --show filename.py 
+
 https://data.cdc.gov/NCHS/Provisional-COVID-19-Death-Counts-by-Week-Ending-D/r8kw-7aab
 
 http://www.pyqtgraph.org
