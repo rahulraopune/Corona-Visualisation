@@ -30,6 +30,7 @@ geoDataFrame.columns = ['country', 'country_code', 'geometry']
 # print(geoDataFrame[geoDataFrame['country'] == 'Antarctica'])
 geoDataFrame = geoDataFrame.drop(geoDataFrame.index[159])
 geoDataFrame.head()
+
 selectedCountryIsoCode = 'IND'
 selectedCountryName = 'India'
 
@@ -176,8 +177,9 @@ def getSelectorParam():
         return 'total_deaths'
     elif selector.value == 'Total Cases Per Million':
         return 'total_cases_per_million'
-    elif selector.value ==  'Total Deaths Per Million':
+    elif selector.value == 'Total Deaths Per Million':
         return 'total_deaths_per_million'
+
 
 def handleSelectorChange(attrname, old, new):
     print(attrname, old, new)
@@ -185,7 +187,7 @@ def handleSelectorChange(attrname, old, new):
     geoPlot.add_tools(HoverTool(tooltips=[('Country', '@country'), ('Total Cases',
                                                                     '@total_cases_formatted'), ('Total Deaths', '@total_deaths_formatted')], renderers=[patch]))
     geoPlot.title.text = '%s Plot' % (selector.value)
-    
+
     linePlotCountryTotalCases(selectedCountryIsoCode,
                               selectedCountryName, param=getSelectorParam())
 
@@ -276,6 +278,9 @@ def piePlotForCountry(isoCode, countryName):
 
 
 def handleTap(model):
+    global selectedCountryName
+    global selectedCountryIsoCode
+    
     selectedCountryName = findCountry((model.y, model.x))
     selectedCountryIsoCode = geoDataFrame[geoDataFrame['country']
                                           == selectedCountryName]['iso_code'].values[0]
