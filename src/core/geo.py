@@ -38,7 +38,7 @@ datasetRaw = pd.read_csv(
     join(dirname(__file__), 'datasets', 'owid-covid-data.csv'))
 # drop World data and drop iso_code with NaN values
 datasetRaw = datasetRaw[datasetRaw.iso_code != 'OWID_WRL']
-datasetRaw = datasetRaw.dropna(subset=['iso_code'])
+datasetRaw = datasetRaw.dropna(subset=['iso_code', 'total_cases'])
 # convert date column to pandas date
 datasetRaw['date'] = pd.to_datetime(datasetRaw.date)
 # sort by date in descending
@@ -47,6 +47,12 @@ datasetRaw = datasetRaw.sort_values(by='date', ascending=False)
 # select unique country values (as data is sorted in descending based on date and head 1 will give the most recent record of a country)
 covidDataFrame = datasetRaw.groupby(['iso_code'], as_index=False).head(1)
 
+
+# cases dataset
+casesDatasetRaw = pd.read_csv(
+    join(dirname(__file__), 'datasets', 'datasets_494766_1267375_country_wise_latest.csv'))
+casesDataset = covidDataFrame.merge(casesDatasetRaw, how='left', left_on='location', right_on='Country/Region')
+# print(casesDataset[casesDataset['iso_code'] == 'IND']['Active'])
 
 # format numbers to en_US locale for better readability
 locale.setlocale(locale.LC_ALL, 'en_US')
