@@ -18,6 +18,9 @@ from bokeh.events import Tap
 from geopy.geocoders import Nominatim
 from bokeh.transform import cumsum
 
+
+from datetime import datetime
+
 PALETTE_SIZE = 8
 
 # geomap
@@ -129,14 +132,28 @@ color_bar = ColorBar(color_mapper=color_mapper, label_standoff=8, width=500, hei
 
 geoPlot = figure(plot_height=600, plot_width=1000)
 
-# TODO: modify according to line --> RAHUL
+# line init
 linePlot = figure(plot_height=600, plot_width=600,
                   x_axis_type="datetime", title="Country")
 
-months = ['2019/12', '2020/1', '2020/2',
-          '2020/3', '2020/4', '2020/5', '2020/6']
-barPlot = figure(plot_height=600, plot_width=1200, x_range=months, title="Time Series Plot",
+########## Bar Plot Start-Init #######################
+import datetime
+
+covidDataFrame1= datasetRaw
+covidDataFrame1 = covidDataFrame1.sort_values(by='date', ascending=True)
+covidDataFrame1['weekno'] = covidDataFrame1['date'].dt.strftime('%U')
+
+weekno=covidDataFrame1['weekno'].values
+
+from collections import OrderedDict
+
+uniweekno =list(OrderedDict.fromkeys(weekno))
+
+#bar plot init
+barPlot = figure(plot_height=600, plot_width=1000, x_range=uniweekno, title="Time Series Plot",
                  toolbar_location=None)
+########## Bar Plot END-Init #######################
+
 piePlot = figure(plot_height=600, plot_width=600,
                  title="Pie Chart", x_range=(-0.5, 1.0))
 
@@ -195,7 +212,8 @@ def handleSelectorChange(attrname, old, new):
     linePlotCountryTotalCases(selectedCountryIsoCode,
                               selectedCountryName, param=getSelectorParam())
 
-
+    barPlotCountryTotalCases(selectedCountryIsoCode,
+                                selectedCountryName, param=getSelectorParam())
 ################################
 ############################################################################
 ############################################################################
@@ -207,22 +225,17 @@ def cleanDataFrameCountry(countryCode):
     # Add new Year/Month Col and formatted the Year-Month-Day date field to Year/Month
     dataFrameRef['YearMonth'] = pandaRef.to_datetime(dataFrameRef['date']).apply(
         lambda x: '{year}/{month}'.format(year=x.year, month=x.month))
+    dataFrameRef['YearMonthDay'] = pandaRef.to_datetime(dataFrameRef['date']).apply(
+        lambda x: '{year}/{month}/{day}'.format(year=x.year, month=x.month, day=x.day))
+    
+    dataFrameRef['WeekNo'] = dataFrameRef['date'].dt.strftime('%U')
+
     # sort by date in descending
     dataFrameRef = dataFrameRef.sort_values(by='date', ascending=True)
 
-    # select unique country values (as data is sorted in descending based on date and head 1 will give the most recent record of a country)
-    uniqueDataFrame = dataFrameRef.groupby(
-        ['iso_code'], as_index=False).tail(1)
-
-    # print(uniqueDataFrame)
-
-    # sort by date in descending
-    #uniqueDataFrame = uniqueDataFrame.sort_values(by='total_cases', ascending=False)
-    #uniqueDataFrame = uniqueDataFrame.head(20)
-
-    #top20country = uniqueDataFrame['location']
 
     countryDataFrame = dataFrameRef[dataFrameRef.iso_code == countryCode]
+
     return countryDataFrame
 
 
@@ -253,13 +266,60 @@ def linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_case
     row1Child.append(row(linePlot, name='line_plot'))
 
 
-def barPlotCountryTotalCases(isoCode, countryName):
-    countryDataFrame = cleanDataFrameCountry(isoCode)
-    group = countryDataFrame.groupby('YearMonth', as_index=False).sum()
-    barPlot.vbar(x=months, top=group['total_cases'].values, width=0.9)
-    barPlot.title.text = 'Total Cases - %s' % (countryName)
+def barPlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases'):
+
+    # clear line plot from current document
+    #row2 = curdoc().get_model_by_name('row2')
+    #row2Child = row2.children
+    #barPlotLayout = curdoc().get_model_by_id('row2')
+    #row2Child.remove(barPlotLayout)
+    #print("Hello bar")
+
+    #months = ['2019/12', '2020/1', '2020/2',
+    #      '2020/3', '2020/4', '2020/5', '2020/6']
+    #barPlot = figure(plot_height=600, plot_width=1200, x_range=months, title="Time Series Plot", toolbar_location=None)
+
+    countryDataFrame = cleanDataFrameCountry(selectedCountryIsoCode)
+    
+    #print(countryDataFrame)
+    group = countryDataFrame.groupby('WeekNo', as_index=False).sum()
+ 
+    displayArg=''
+    if param == 'total_cases':
+        displayArg='new_cases'
+    
+    if param == 'total_deaths':
+        displayArg='new_deaths'
+    
+    if param == 'total_cases_per_million':
+        displayArg = 'new_cases_per_million'
+
+    if param == 'total_deaths_per_million':
+        displayArg = 'new_deaths_per_million'
+
+    barPlot.vbar(x=uniweekno, top=group[displayArg].values, width=0.9)
+
+    if displayArg == 'new_cases':
+        displayArg='New Cases'
+    
+    if displayArg == 'new_deaths':
+        displayArg='New Deaths'
+    
+    if displayArg == 'new_cases_per_million':
+        displayArg = 'New Cases Per Million'
+
+    if displayArg == 'new_deaths_per_million':
+        displayArg = 'New Deaths Per Million'
+
+    barPlot.title.text = 'Weekly Active %s - %s' % (displayArg, country)
+    #barPlot.xaxis.major_label_orientation = math.pi/2
+    linePlot.xaxis.axis_label = 'Week Number'
+    linePlot.yaxis.axis_label = displayArg
     barPlot.xgrid.grid_line_color = None
     barPlot.y_range.start = 0
+
+    # add new line plot to current document
+    #row2Child.append(row(barPlot, name='row2'))
 
 
 def piePlotForCountry(isoCode, countryName):
@@ -306,6 +366,9 @@ geoPlot.on_event(Tap, handleTap)
 # initialize the geoPlot
 init()
 
+#layout = column(row(column(selector, geoPlot), row(linePlot, name='line_plot'),
+#                    name='row1'), row(row(barPlot, name='bar_plot'), row(piePlot, name='pie_plot'), name='row2'), name='mainLayout')
 layout = column(row(column(selector, geoPlot), row(linePlot, name='line_plot'),
                     name='row1'), row(barPlot, piePlot, name='row2'), name='mainLayout')
 curdoc().add_root(layout)
+#, row(piePlot, name='pie_plot')
