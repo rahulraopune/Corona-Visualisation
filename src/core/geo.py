@@ -51,7 +51,8 @@ covidDataFrame = datasetRaw.groupby(['iso_code'], as_index=False).head(1)
 # cases dataset
 casesDatasetRaw = pd.read_csv(
     join(dirname(__file__), 'datasets', 'datasets_494766_1267375_country_wise_latest.csv'))
-casesDataset = covidDataFrame.merge(casesDatasetRaw, how='left', left_on='location', right_on='Country/Region')
+casesDataset = covidDataFrame.merge(
+    casesDatasetRaw, how='left', left_on='location', right_on='Country/Region')
 # print(casesDataset[casesDataset['iso_code'] == 'IND']['Active'])
 
 # format numbers to en_US locale for better readability
@@ -124,8 +125,11 @@ color_mapper = LinearColorMapper(palette=palette, low=0, high=8)
 # tick_labels = {'0': '0%', '5': '5%', '10': '10%', '15': '15%',
 #                '20': '20%', '25': '25%', '30': '30%', '35': '35%', '40': '>40%'}
 # Create color bar.
+tick_labels = {'0': 'Mild', '1': '', '2': '', '3': '',
+               '4': 'Moderate', '5': '', '6': '', '7': '', '8': 'Severe'}
 color_bar = ColorBar(color_mapper=color_mapper, label_standoff=8, width=500, height=20,
-                     border_line_color=None, location=(0, 0), orientation='horizontal')
+                     border_line_color=None, location=(0, 0), orientation='horizontal',
+                     major_label_overrides=tick_labels)
 
 geoPlot = figure(plot_height=600, plot_width=1000)
 
