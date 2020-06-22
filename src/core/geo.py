@@ -13,10 +13,11 @@ from bokeh.io import show, curdoc
 from bokeh.plotting import figure
 from bokeh.models import GeoJSONDataSource, LinearColorMapper, HoverTool, ColorBar, Select, ColumnDataSource, DatetimeTickFormatter
 from bokeh.layouts import row, column
-from bokeh.palettes import brewer, Spectral5, Category20c
+from bokeh.palettes import brewer, Spectral5, Category20c,mpl
 from bokeh.events import Tap
 from geopy.geocoders import Nominatim
 from bokeh.transform import cumsum
+from math import pi
 
 PALETTE_SIZE = 8
 
@@ -137,7 +138,7 @@ months = ['2019/12', '2020/1', '2020/2',
           '2020/3', '2020/4', '2020/5', '2020/6']
 barPlot = figure(plot_height=600, plot_width=1200, x_range=months, title="Time Series Plot",
                  toolbar_location=None)
-piePlot = figure(plot_height=600, plot_width=600,
+piePlot = figure(plot_height=600, plot_width=600,tools="hover", tooltips="@stats:@value",
                  title="Pie Chart", x_range=(-0.5, 1.0))
 
 
@@ -194,8 +195,7 @@ def handleSelectorChange(attrname, old, new):
 
     linePlotCountryTotalCases(selectedCountryIsoCode,
                               selectedCountryName, param=getSelectorParam())
-
-
+    piePlotForCountry(selectedCountryName)
 ################################
 ############################################################################
 ############################################################################
@@ -203,7 +203,7 @@ def handleSelectorChange(attrname, old, new):
 
 
 def cleanDataFrameCountry(countryCode):
-    dataFrameRef = datasetRaw
+    dataFrameRef = casesDataset
     # Add new Year/Month Col and formatted the Year-Month-Day date field to Year/Month
     dataFrameRef['YearMonth'] = pandaRef.to_datetime(dataFrameRef['date']).apply(
         lambda x: '{year}/{month}'.format(year=x.year, month=x.month))
@@ -262,24 +262,41 @@ def barPlotCountryTotalCases(isoCode, countryName):
     barPlot.y_range.start = 0
 
 
-def piePlotForCountry(isoCode, countryName):
-    countryDataFrame = cleanDataFrameCountry(isoCode).tail(1)
-    # selectionJson = countryDataFrame[[
-    #     'population', 'total_cases', 'total_deaths']].to_json(orient='records')
-    #     # .iloc[0].values
-    #     #
-    # selectionJson = json.dumps(selectionJson)
-    # data = pd.Series(selectionJson).reset_index(
-    #     name='value').rename(columns={'index': 'country'})
+def piePlotForCountry(isoCode,countryName):
+    row2 = curdoc().get_model_by_name('row2')
+    row2Child = row2.children
+    PiePlotLayout = curdoc().get_model_by_name('pie_plot')
+    row2Child.remove(PiePlotLayout)
 
-    # print(data['value'].values)
-    # data['angle'] = data['value']/data['value'].sum() * 2*pi
-    # data['color'] = Category20c[len(selectionJson)]
-    # piePlot.wedge(x=0, y=1, radius=0.4,
-    #               start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
-    #               line_color="white", fill_color='color', legend='country', source=data)
-    piePlot.title.text = 'COVID-19 Distribution - %s' % (countryName)
+    countryDataFrame = cleanDataFrameCountry(isoCode)
+    selectionJson = countryDataFrame[['Country/Region', 'Deaths', 'Recovered', 'Active', 'New cases', 'New deaths','New recovered']].to_json(orient='records')
+    json_data = json.loads(selectionJson)
+    print(countryDataFrame)
+    for dict_item in json_data:
+        for key in dict_item:
+            if dict_item[key] == countryName:
+                selected_keys = [ 'Deaths', 'Recovered', 'Active', 'New cases']
+                new_dict = {k: dict_item[k] for k in selected_keys}
+                selectedKeysData = new_dict.copy()
+            else:
+                break
+    pc_data = pd.Series(selectedKeysData).reset_index(name='value').rename(columns={'index':'stats'})
+    pc_data['angle'] = pc_data['value']/pc_data['value'].sum() * 2 * pi
+    pc_data['color'] = mpl['Plasma'][len(selectedKeysData)]
 
+    # p = figure(plot_height=350, title="Pie Chart", toolbar_location=None,
+    #            tools="hover", tooltips="@stats:@value", x_range=(-0.5, 1.0))
+    piePlot = figure(plot_height=600, plot_width=600,
+                     title="Pie Chart", tools="hover",tooltips="@stats:@value",x_range=(-0.5, 1.0))
+    piePlot.wedge(x=0, y=1, radius=0.4,
+            start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
+            line_color="white", fill_color='color', legend_field='stats', source=pc_data)
+    piePlot.title.text = 'COVID-19 Distribution - %s' % (selectedCountryName)
+    piePlot.axis.axis_label = None
+    piePlot.axis.visible = False
+    piePlot.grid.grid_line_color = None
+    selectedKeysData.clear()
+    row2Child.append(row(piePlot, name='pie_plot'))
 
 def handleTap(model):
     global selectedCountryName
@@ -291,7 +308,7 @@ def handleTap(model):
     # TODO: change line plot and bar plot here
     barPlotCountryTotalCases(selectedCountryIsoCode,
                              selectedCountryName)
-    piePlotForCountry(selectedCountryIsoCode, selectedCountryName)
+    piePlotForCountry(selectedCountryIsoCode,selectedCountryName)
     linePlotCountryTotalCases(selectedCountryIsoCode,
                               selectedCountryName, getSelectorParam())
     # print(selectedCountryIsoCode)
@@ -307,5 +324,5 @@ geoPlot.on_event(Tap, handleTap)
 init()
 
 layout = column(row(column(selector, geoPlot), row(linePlot, name='line_plot'),
-                    name='row1'), row(barPlot, piePlot, name='row2'), name='mainLayout')
+                    name='row1'), row(barPlot,row(piePlot,name='pie_plot'),name='row2'), name='mainLayout')
 curdoc().add_root(layout)
