@@ -256,7 +256,7 @@ def linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_case
     # print(strDates)
     linePlot.grid.grid_line_alpha = 0.1
     linePlot.xaxis.axis_label = 'Date'
-    linePlot.yaxis.axis_label = param
+    linePlot.yaxis.axis_label = selector.value
     linePlot.title.text = 'Timeseries %s Plot of %s' % (
         selector.value, country)
     linePlot.yaxis.formatter.use_scientific = False
@@ -270,7 +270,7 @@ def linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_case
         "%d", value, grouping=True) for value in data[selectedCountryIsoCode].values]
     source = ColumnDataSource(
         data={'x': np.array(data['date'], dtype=np.datetime64), 'y': data[selectedCountryIsoCode], 'data_str': formattedData, 'date_str': formattedDate})
-    hover = HoverTool(tooltips=[('Date', '@date_str'), (param, '@data_str')])
+    hover = HoverTool(tooltips=[('Date', '@date_str'), (selector.value, '@data_str')])
     # hover = HoverTool(tooltips=[('date', '@DateTime{%F}'),(param, '@y')],
     #       formatters={'@DateTime': 'date'})
     linePlot.add_tools(hover)
@@ -329,8 +329,8 @@ def barPlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases
 
     barPlot.title.text = 'Weekly Active %s - %s' % (displayArg, country)
     #barPlot.xaxis.major_label_orientation = math.pi/2
-    linePlot.xaxis.axis_label = 'Week Number'
-    linePlot.yaxis.axis_label = displayArg
+    barPlot.xaxis.axis_label = 'Week Number'
+    barPlot.yaxis.axis_label = displayArg
     barPlot.xgrid.grid_line_color = None
     barPlot.y_range.start = 0
 
