@@ -312,7 +312,8 @@ def barPlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases
     if param == 'total_deaths_per_million':
         displayArg = 'new_deaths_per_million'
 
-    barPlot.vbar(x=uniweekno, top=group[displayArg].values, width=0.9)
+    barPlot.vbar(
+        x=uniweekno, top=group[displayArg].values, width=0.9, color='indianred')
 
     if displayArg == 'new_cases':
         displayArg = 'New Cases'
