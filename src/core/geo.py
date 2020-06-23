@@ -137,7 +137,7 @@ geoPlot = figure(plot_height=600, plot_width=1000, toolbar_location=None)
 
 # line init
 linePlot = figure(plot_height=600, plot_width=600,
-                  x_axis_type="datetime", title="Country")
+                  x_axis_type="datetime", title="Country", toolbar_location=None)
 
 ########## Bar Plot Start-Init #######################
 
@@ -246,10 +246,14 @@ def cleanDataFrameCountry(countryCode):
 def linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases', isInit=False):
     global linePlot
     linePlot = figure(plot_height=600, plot_width=600,
-                      x_axis_type="datetime", title="Country", tools='hover')
+                      x_axis_type="datetime", title="Country")
     countryDataFrame = cleanDataFrameCountry(selectedCountryIsoCode)
     data = pd.pivot_table(countryDataFrame, index='date',
                           columns='iso_code', values=param).reset_index()
+    print(data[selectedCountryIsoCode].values)
+    # strDates = pd.pivot_table(countryDataFrame, index='date',
+    #                           columns='iso_code', values='date').reset_index()
+    # print(strDates)
     linePlot.grid.grid_line_alpha = 0.1
     linePlot.xaxis.axis_label = 'Date'
     linePlot.yaxis.axis_label = param
@@ -259,8 +263,21 @@ def linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_case
     linePlot.xaxis.formatter = DatetimeTickFormatter(
         hours=["%d %B %Y"], days=["%d %B %Y"], months=["%d %B %Y"], years=["%d %B %Y"])
     # linePlot.legend = False
-    linePlot.line(np.array(data['date'], dtype=np.datetime64),
-                  data[selectedCountryIsoCode], color="cyan", legend_label=country, line_width=3)
+    formattedDate = [pd.to_datetime(np.datetime_as_string(value, unit='D')).strftime(
+        "%d %B %Y") for value in data['date'].values]
+
+    formattedData = [locale.format_string(
+        "%d", value, grouping=True) for value in data[selectedCountryIsoCode].values]
+    source = ColumnDataSource(
+        data={'x': np.array(data['date'], dtype=np.datetime64), 'y': data[selectedCountryIsoCode], 'data_str': formattedData, 'date_str': formattedDate})
+    hover = HoverTool(tooltips=[('Date', '@date_str'), (param, '@data_str')])
+    # hover = HoverTool(tooltips=[('date', '@DateTime{%F}'),(param, '@y')],
+    #       formatters={'@DateTime': 'date'})
+    linePlot.add_tools(hover)
+    linePlot.line(x='x', y='y', source=source, color="orange",
+                  legend_label=country, line_width=3)
+    linePlot.legend.location = "top_left"
+
     if not isInit:
         # clear line plot from current document
         row1 = curdoc().get_model_by_name('row1')
