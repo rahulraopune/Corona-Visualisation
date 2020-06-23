@@ -275,19 +275,18 @@ def piePlotForCountry(isoCode,countryName):
     for dict_item in json_data:
         for key in dict_item:
             if dict_item[key] == countryName:
-                selected_keys = [ 'Deaths', 'Recovered', 'Active', 'New cases']
+                selected_keys = [ 'Deaths', 'Recovered', 'Active']
                 new_dict = {k: dict_item[k] for k in selected_keys}
                 selectedKeysData = new_dict.copy()
-            else:
-                break
     pc_data = pd.Series(selectedKeysData).reset_index(name='value').rename(columns={'index':'stats'})
+    pc_data['percent'] = pc_data['value'] / pc_data['value'].sum() * 100
     pc_data['angle'] = pc_data['value']/pc_data['value'].sum() * 2 * pi
     pc_data['color'] = mpl['Plasma'][len(selectedKeysData)]
 
     # p = figure(plot_height=350, title="Pie Chart", toolbar_location=None,
     #            tools="hover", tooltips="@stats:@value", x_range=(-0.5, 1.0))
     piePlot = figure(plot_height=600, plot_width=600,
-                     title="Pie Chart", tools="hover",tooltips="@stats:@value",x_range=(-0.5, 1.0))
+                     title="Pie Chart", tools="hover",tooltips="@stats:@percent{0.2f} %",x_range=(-0.5, 1.0))
     piePlot.wedge(x=0, y=1, radius=0.4,
             start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
             line_color="white", fill_color='color', legend_field='stats', source=pc_data)
