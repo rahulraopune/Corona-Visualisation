@@ -1,6 +1,6 @@
 from collections import OrderedDict
 import datetime
-from bokeh.transform import factor_cmap
+from bokeh.transform import factor_cmap, dodge
 import pandas as pandaRef
 import math
 import pandas as pd
@@ -156,6 +156,9 @@ barPlot = figure(plot_height=600, plot_width=1000, x_range=uniweekno, title="Tim
 piePlot = figure(plot_height=600, plot_width=450, tools="hover", tooltips="@stats:@value",
                  title="Pie Chart", x_range=(-0.5, 1.0))
 
+continentBarPlot = figure(plot_height=600, plot_width=1400, x_range=[], title="Time Series Plot",
+                          toolbar_location=None)
+
 
 def init():
     geoPlot.add_layout(color_bar, 'below')
@@ -174,6 +177,8 @@ def init():
     piePlotForCountry(selectedCountryIsoCode, selectedCountryName, isInit=True)
     linePlotCountryTotalCases(selectedCountryIsoCode,
                               selectedCountryName, getSelectorParam(), isInit=True)
+    barPlotForContinent(selectedCountryIsoCode,
+                        selectedCountryName, isInit=True)
 
 
 def generatePatchBasedOnSelect(selectValue):
@@ -270,7 +275,8 @@ def linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_case
         "%d", value, grouping=True) for value in data[selectedCountryIsoCode].values]
     source = ColumnDataSource(
         data={'x': np.array(data['date'], dtype=np.datetime64), 'y': data[selectedCountryIsoCode], 'data_str': formattedData, 'date_str': formattedDate})
-    hover = HoverTool(tooltips=[('Date', '@date_str'), (selector.value, '@data_str')])
+    hover = HoverTool(
+        tooltips=[('Date', '@date_str'), (selector.value, '@data_str')])
     # hover = HoverTool(tooltips=[('date', '@DateTime{%F}'),(param, '@y')],
     #       formatters={'@DateTime': 'date'})
     linePlot.add_tools(hover)
@@ -378,6 +384,47 @@ def piePlotForCountry(isoCode, countryName, isInit=False):
                                    column(piePlot, name='pie_column'), name='row2'))
 
 
+def barPlotForContinent(isoCode, countryName, isInit=False):
+    global continentBarPlot
+
+    fruits = ['Apples', 'Pears', 'Nectarines',
+              'Plums', 'Grapes', 'Strawberries']
+    years = ['2015', '2016', '2017']
+
+    data = {'fruits': fruits,
+            '2015': [2, 1, 4, 3, 2, 4],
+            '2016': [5, 3, 3, 2, 4, 6],
+            '2017': [3, 2, 4, 4, 5, 3]}
+
+    source = ColumnDataSource(data=data)
+
+    continentBarPlot = figure(x_range=fruits, y_range=(0, 10), plot_height=500, plot_width=1200, title="Fruit Counts by Year",
+                              toolbar_location=None, tools="")
+
+    continentBarPlot.vbar(x=dodge('fruits', -0.25, range=continentBarPlot.x_range), top='2015', width=0.2, source=source,
+                          color="#c9d9d3", legend_label="2015")
+
+    continentBarPlot.vbar(x=dodge('fruits',  0.0,  range=continentBarPlot.x_range), top='2016', width=0.2, source=source,
+                          color="#718dbf", legend_label="2016")
+
+    continentBarPlot.vbar(x=dodge('fruits',  0.25, range=continentBarPlot.x_range), top='2017', width=0.2, source=source,
+                          color="#e84d60", legend_label="2017")
+
+    continentBarPlot.x_range.range_padding = 0.1
+    continentBarPlot.xgrid.grid_line_color = None
+    continentBarPlot.legend.location = "top_left"
+    continentBarPlot.legend.orientation = "horizontal"
+
+    if not isInit:
+        # clear line plot from current document
+        mainLayout = curdoc().get_model_by_name('mainLayout')
+        mainLayoutChild = mainLayout.children
+        row3 = curdoc().get_model_by_name('row3')
+        mainLayoutChild.remove(row3)
+        # bar plot is added here just to maintain the layout order
+        mainLayoutChild.append(row(continentBarPlot, name='row3'))
+
+
 def handleTap(model):
     global selectedCountryName
     global selectedCountryIsoCode
@@ -391,6 +438,7 @@ def handleTap(model):
     piePlotForCountry(selectedCountryIsoCode, selectedCountryName)
     linePlotCountryTotalCases(selectedCountryIsoCode,
                               selectedCountryName, getSelectorParam())
+    barPlotForContinent(selectedCountryIsoCode, selectedCountryName)                              
     # print(selectedCountryIsoCode)
 
 
@@ -403,6 +451,7 @@ geoPlot.on_event(Tap, handleTap)
 # initialize the geoPlot
 init()
 
-layout = column(row(column(selector, geoPlot), row(linePlot, name='line_plot'),
-                    name='row1'), row(column(barPlot, name='bar_column'), column(piePlot, name='pie_column'), name='row2'), name='mainLayout')
+layout = column(row(column(selector, geoPlot),
+                    row(linePlot, name='line_plot'),
+                    name='row1'), row(column(barPlot, name='bar_column'), column(piePlot, name='pie_column'), name='row2'), row(continentBarPlot, name='row3'), name='mainLayout')
 curdoc().add_root(layout)
