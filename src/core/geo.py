@@ -1,3 +1,5 @@
+from collections import OrderedDict
+import datetime
 from bokeh.transform import factor_cmap
 import pandas as pandaRef
 import math
@@ -54,7 +56,8 @@ covidDataFrame = datasetRaw.groupby(['iso_code'], as_index=False).head(1)
 # cases dataset
 casesDatasetRaw = pd.read_csv(
     join(dirname(__file__), 'datasets', 'datasets_494766_1267375_country_wise_latest.csv'))
-casesDataset = covidDataFrame.merge(casesDatasetRaw, how='left', left_on='location', right_on='Country/Region')
+casesDataset = covidDataFrame.merge(
+    casesDatasetRaw, how='left', left_on='location', right_on='Country/Region')
 # print(casesDataset[casesDataset['iso_code'] == 'IND']['Active'])
 
 # format numbers to en_US locale for better readability
@@ -137,19 +140,17 @@ linePlot = figure(plot_height=600, plot_width=600,
                   x_axis_type="datetime", title="Country")
 
 ########## Bar Plot Start-Init #######################
-import datetime
 
-covidDataFrame1= datasetRaw
+covidDataFrame1 = datasetRaw
 covidDataFrame1 = covidDataFrame1.sort_values(by='date', ascending=True)
 covidDataFrame1['weekno'] = covidDataFrame1['date'].dt.strftime('%U')
 
-weekno=covidDataFrame1['weekno'].values
+weekno = covidDataFrame1['weekno'].values
 
-from collections import OrderedDict
 
-uniweekno =list(OrderedDict.fromkeys(weekno))
+uniweekno = list(OrderedDict.fromkeys(weekno))
 
-#bar plot init
+# bar plot init
 barPlot = figure(plot_height=600, plot_width=1000, x_range=uniweekno, title="Time Series Plot",
                  toolbar_location=None)
 ########## Bar Plot END-Init #######################
@@ -213,7 +214,7 @@ def handleSelectorChange(attrname, old, new):
                               selectedCountryName, param=getSelectorParam())
 
     barPlotCountryTotalCases(selectedCountryIsoCode,
-                                selectedCountryName, param=getSelectorParam())
+                             selectedCountryName, param=getSelectorParam())
 ################################
 ############################################################################
 ############################################################################
@@ -227,12 +228,11 @@ def cleanDataFrameCountry(countryCode):
         lambda x: '{year}/{month}'.format(year=x.year, month=x.month))
     dataFrameRef['YearMonthDay'] = pandaRef.to_datetime(dataFrameRef['date']).apply(
         lambda x: '{year}/{month}/{day}'.format(year=x.year, month=x.month, day=x.day))
-    
+
     dataFrameRef['WeekNo'] = dataFrameRef['date'].dt.strftime('%U')
 
     # sort by date in descending
     dataFrameRef = dataFrameRef.sort_values(by='date', ascending=True)
-
 
     countryDataFrame = dataFrameRef[dataFrameRef.iso_code == countryCode]
 
@@ -269,28 +269,27 @@ def linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_case
 def barPlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases'):
 
     # clear line plot from current document
-    #row2 = curdoc().get_model_by_name('row2')
-    #row2Child = row2.children
-    #barPlotLayout = curdoc().get_model_by_id('row2')
-    #row2Child.remove(barPlotLayout)
-    #print("Hello bar")
+    mainLayout = curdoc().get_model_by_name('mainLayout')
+    mainLayoutChild = mainLayout.children
+    row2 = curdoc().get_model_by_name('row2')
+    mainLayoutChild.remove(row2)
 
-    #months = ['2019/12', '2020/1', '2020/2',
-    #      '2020/3', '2020/4', '2020/5', '2020/6']
-    #barPlot = figure(plot_height=600, plot_width=1200, x_range=months, title="Time Series Plot", toolbar_location=None)
+    global barPlot
+    barPlot = figure(plot_height=600, plot_width=1000, x_range=uniweekno, title="Time Series Plot",
+                     toolbar_location=None)
 
     countryDataFrame = cleanDataFrameCountry(selectedCountryIsoCode)
-    
-    #print(countryDataFrame)
+
+    # print(countryDataFrame)
     group = countryDataFrame.groupby('WeekNo', as_index=False).sum()
- 
-    displayArg=''
+
+    displayArg = ''
     if param == 'total_cases':
-        displayArg='new_cases'
-    
+        displayArg = 'new_cases'
+
     if param == 'total_deaths':
-        displayArg='new_deaths'
-    
+        displayArg = 'new_deaths'
+
     if param == 'total_cases_per_million':
         displayArg = 'new_cases_per_million'
 
@@ -300,11 +299,11 @@ def barPlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases
     barPlot.vbar(x=uniweekno, top=group[displayArg].values, width=0.9)
 
     if displayArg == 'new_cases':
-        displayArg='New Cases'
-    
+        displayArg = 'New Cases'
+
     if displayArg == 'new_deaths':
-        displayArg='New Deaths'
-    
+        displayArg = 'New Deaths'
+
     if displayArg == 'new_cases_per_million':
         displayArg = 'New Cases Per Million'
 
@@ -318,8 +317,9 @@ def barPlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases
     barPlot.xgrid.grid_line_color = None
     barPlot.y_range.start = 0
 
-    # add new line plot to current document
-    #row2Child.append(row(barPlot, name='row2'))
+    # pie plot is added here just to maintain the layout order
+    mainLayoutChild.append(row(column(barPlot, name='bar_column'),
+                               column(piePlot, name='pie_column'), name='row2'))
 
 
 def piePlotForCountry(isoCode, countryName):
@@ -350,7 +350,7 @@ def handleTap(model):
                                           == selectedCountryName]['iso_code'].values[0]
     # TODO: change line plot and bar plot here
     barPlotCountryTotalCases(selectedCountryIsoCode,
-                             selectedCountryName)
+                             selectedCountryName, getSelectorParam())
     piePlotForCountry(selectedCountryIsoCode, selectedCountryName)
     linePlotCountryTotalCases(selectedCountryIsoCode,
                               selectedCountryName, getSelectorParam())
@@ -366,9 +366,9 @@ geoPlot.on_event(Tap, handleTap)
 # initialize the geoPlot
 init()
 
-#layout = column(row(column(selector, geoPlot), row(linePlot, name='line_plot'),
+# layout = column(row(column(selector, geoPlot), row(linePlot, name='line_plot'),
 #                    name='row1'), row(row(barPlot, name='bar_plot'), row(piePlot, name='pie_plot'), name='row2'), name='mainLayout')
 layout = column(row(column(selector, geoPlot), row(linePlot, name='line_plot'),
-                    name='row1'), row(barPlot, piePlot, name='row2'), name='mainLayout')
+                    name='row1'), row(column(barPlot, name='bar_column'), column(piePlot, name='pie_column'), name='row2'), name='mainLayout')
 curdoc().add_root(layout)
-#, row(piePlot, name='pie_plot')
+# , row(piePlot, name='pie_plot')
