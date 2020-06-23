@@ -15,7 +15,7 @@ from bokeh.io import show, curdoc
 from bokeh.plotting import figure
 from bokeh.models import GeoJSONDataSource, LinearColorMapper, HoverTool, ColorBar, Select, ColumnDataSource, DatetimeTickFormatter
 from bokeh.layouts import row, column
-from bokeh.palettes import brewer, Spectral5, Category20c, mpl
+from bokeh.palettes import brewer, Spectral5, Category20c, Category10
 from bokeh.events import Tap
 from geopy.geocoders import Nominatim
 from bokeh.transform import cumsum
@@ -34,8 +34,8 @@ geoDataFrame.columns = ['country', 'country_code', 'geometry']
 geoDataFrame = geoDataFrame.drop(geoDataFrame.index[159])
 geoDataFrame.head()
 
-selectedCountryIsoCode = 'IND'
-selectedCountryName = 'India'
+selectedCountryIsoCode = 'DEU'
+selectedCountryName = 'Germany'
 
 
 # COVID-19 dataset
@@ -133,7 +133,7 @@ color_mapper = LinearColorMapper(palette=palette, low=0, high=8)
 color_bar = ColorBar(color_mapper=color_mapper, label_standoff=8, width=500, height=20,
                      border_line_color=None, location=(0, 0), orientation='horizontal')
 
-geoPlot = figure(plot_height=600, plot_width=1000)
+geoPlot = figure(plot_height=600, plot_width=1000, toolbar_location=None)
 
 # line init
 linePlot = figure(plot_height=600, plot_width=600,
@@ -146,8 +146,6 @@ covidDataFrame1 = covidDataFrame1.sort_values(by='date', ascending=True)
 covidDataFrame1['weekno'] = covidDataFrame1['date'].dt.strftime('%U')
 
 weekno = covidDataFrame1['weekno'].values
-
-
 uniweekno = list(OrderedDict.fromkeys(weekno))
 
 # bar plot init
@@ -170,6 +168,12 @@ def init():
     geoPlot.add_tools(HoverTool(tooltips=[('Country', '@country'), ('Total Cases',
                                                                     '@total_cases_formatted'), ('Total Deaths', '@total_deaths_formatted')], renderers=[patch]))
     geoPlot.title.text = 'Total Cases Plot'
+
+    barPlotCountryTotalCases(selectedCountryIsoCode,
+                             selectedCountryName, getSelectorParam(), isInit=True)
+    piePlotForCountry(selectedCountryIsoCode, selectedCountryName, isInit=True)
+    linePlotCountryTotalCases(selectedCountryIsoCode,
+                              selectedCountryName, getSelectorParam(), isInit=True)
 
 
 def generatePatchBasedOnSelect(selectValue):
@@ -239,13 +243,8 @@ def cleanDataFrameCountry(countryCode):
     return countryDataFrame
 
 
-def linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases'):
-    # clear line plot from current document
-    row1 = curdoc().get_model_by_name('row1')
-    row1Child = row1.children
-    linePlotLayout = curdoc().get_model_by_name('line_plot')
-    row1Child.remove(linePlotLayout)
-
+def linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases', isInit=False):
+    global linePlot
     linePlot = figure(plot_height=600, plot_width=600,
                       x_axis_type="datetime", title="Country", tools='hover')
     countryDataFrame = cleanDataFrameCountry(selectedCountryIsoCode)
@@ -262,11 +261,17 @@ def linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_case
     # linePlot.legend = False
     linePlot.line(np.array(data['date'], dtype=np.datetime64),
                   data[selectedCountryIsoCode], color="cyan", legend_label=country, line_width=3)
-    # add new line plot to current document
-    row1Child.append(row(linePlot, name='line_plot'))
+    if not isInit:
+        # clear line plot from current document
+        row1 = curdoc().get_model_by_name('row1')
+        row1Child = row1.children
+        linePlotLayout = curdoc().get_model_by_name('line_plot')
+        row1Child.remove(linePlotLayout)
+        # add new line plot to current document
+        row1Child.append(row(linePlot, name='line_plot'))
 
 
-def barPlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases'):
+def barPlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases', isInit=False):
 
     global barPlot
     barPlot = figure(plot_height=600, plot_width=1000, x_range=uniweekno, title="Time Series Plot",
@@ -311,49 +316,27 @@ def barPlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases
     barPlot.xgrid.grid_line_color = None
     barPlot.y_range.start = 0
 
-    # clear plots from current document
-    mainLayout = curdoc().get_model_by_name('mainLayout')
-    mainLayoutChild = mainLayout.children
-    row2 = curdoc().get_model_by_name('row2')
-    mainLayoutChild.remove(row2)
-    # pie plot is added here just to maintain the layout order
-    mainLayoutChild.append(row(column(barPlot, name='bar_column'),
-                               column(piePlot, name='pie_column'), name='row2'))
+    if not isInit:
+        # clear plots from current document
+        mainLayout = curdoc().get_model_by_name('mainLayout')
+        mainLayoutChild = mainLayout.children
+        row2 = curdoc().get_model_by_name('row2')
+        mainLayoutChild.remove(row2)
+        # pie plot is added here just to maintain the layout order
+        mainLayoutChild.append(row(column(barPlot, name='bar_column'),
+                                   column(piePlot, name='pie_column'), name='row2'))
 
 
-def piePlotForCountry(isoCode, countryName):
+def piePlotForCountry(isoCode, countryName, isInit=False):
+    sourceJson = (casesDataset[casesDataset['iso_code'] == isoCode][[
+                  'Deaths', 'Recovered', 'Active']]).to_json(orient='records')
+    json_data = json.loads(sourceJson)[0]
 
-    # dataFrameRef = casesDataset
-    # # Add new Year/Month Col and formatted the Year-Month-Day date field to Year/Month
-    # dataFrameRef['YearMonth'] = pandaRef.to_datetime(dataFrameRef['date']).apply(
-    #     lambda x: '{year}/{month}'.format(year=x.year, month=x.month))
-    # # sort by date in descending
-    # dataFrameRef = dataFrameRef.sort_values(by='date', ascending=True)
-
-    # select unique country values (as data is sorted in descending based on date and head 1 will give the most recent record of a country)
-    # uniqueDataFrame = dataFrameRef.groupby(
-    #     ['iso_code'], as_index=False).tail(1)
-
-    # casesDf = covidDataFrame.merge()
-    sourceJson = (casesDataset[casesDataset['iso_code'] == isoCode]).to_json(orient='records')[0]
-
-    # countryDataFrame = dataFrameRef[dataFrameRef.iso_code == isoCode]
-    # selectionJson = countryDataFrame[['Country/Region', 'Deaths', 'Recovered', 'Active']].to_json(orient='records')
-    # json_data = json.loads(selectionJson)
-    # # print(countryDataFrame)
-    # # print(json_data)
-    # for dict_item in json_data:
-    #     for key in dict_item:
-    #         if dict_item[key] == countryName:
-    #             selected_keys = ['Deaths', 'Recovered', 'Active']
-    #             new_dict = {k: dict_item[k] for k in selected_keys}
-    #             selectedKeysData = new_dict.copy()
-
-    pc_data = pd.Series(sourceJson).reset_index(
+    pc_data = pd.Series(json_data).reset_index(
         name='value').rename(columns={'index': 'stats'})
     pc_data['percent'] = pc_data['value'] / pc_data['value'].sum() * 100
     pc_data['angle'] = pc_data['value']/pc_data['value'].sum() * 2 * pi
-    pc_data['color'] = mpl['Plasma'][len(sourceJson)]
+    pc_data['color'] = Category10[len(json_data)]
 
     global piePlot
     piePlot = figure(plot_height=600, plot_width=450,
@@ -365,16 +348,16 @@ def piePlotForCountry(isoCode, countryName):
     piePlot.axis.axis_label = None
     piePlot.axis.visible = False
     piePlot.grid.grid_line_color = None
-    # selectedKeysData.clear()
 
-    # clear plots from current document
-    mainLayout = curdoc().get_model_by_name('mainLayout')
-    mainLayoutChild = mainLayout.children
-    row2 = curdoc().get_model_by_name('row2')
-    mainLayoutChild.remove(row2)
-    # bar plot is added here just to maintain the layout order
-    mainLayoutChild.append(row(column(barPlot, name='bar_column'),
-                               column(piePlot, name='pie_column'), name='row2'))
+    if not isInit:
+        # clear plots from current document
+        mainLayout = curdoc().get_model_by_name('mainLayout')
+        mainLayoutChild = mainLayout.children
+        row2 = curdoc().get_model_by_name('row2')
+        mainLayoutChild.remove(row2)
+        # bar plot is added here just to maintain the layout order
+        mainLayoutChild.append(row(column(barPlot, name='bar_column'),
+                                   column(piePlot, name='pie_column'), name='row2'))
 
 
 def handleTap(model):
@@ -387,7 +370,7 @@ def handleTap(model):
     # TODO: change line plot and bar plot here
     barPlotCountryTotalCases(selectedCountryIsoCode,
                              selectedCountryName, getSelectorParam())
-    # piePlotForCountry(selectedCountryIsoCode, selectedCountryName)
+    piePlotForCountry(selectedCountryIsoCode, selectedCountryName)
     linePlotCountryTotalCases(selectedCountryIsoCode,
                               selectedCountryName, getSelectorParam())
     # print(selectedCountryIsoCode)
@@ -402,9 +385,6 @@ geoPlot.on_event(Tap, handleTap)
 # initialize the geoPlot
 init()
 
-# layout = column(row(column(selector, geoPlot), row(linePlot, name='line_plot'),
-#                    name='row1'), row(row(barPlot, name='bar_plot'), row(piePlot, name='pie_plot'), name='row2'), name='mainLayout')
 layout = column(row(column(selector, geoPlot), row(linePlot, name='line_plot'),
                     name='row1'), row(column(barPlot, name='bar_column'), column(piePlot, name='pie_column'), name='row2'), name='mainLayout')
 curdoc().add_root(layout)
-# , row(piePlot, name='pie_plot')
