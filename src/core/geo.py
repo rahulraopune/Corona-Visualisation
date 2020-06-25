@@ -226,10 +226,8 @@ def handleSelectorChange(attrname, old, new):
     barPlotCountryTotalCases(selectedCountryIsoCode,
                              selectedCountryName, param=getSelectorParam())
 ################################
-############################################################################
-############################################################################
-# Sachin Code impplementation
-
+# clean the dataframe for the country selected during interaction operation
+# Addtion WeekNo, YearMonth columns added as required by subplots
 def cleanDataFrameCountry(countryCode):
     dataFrameRef = datasetRaw
     # Add new Year/Month Col and formatted the Year-Month-Day date field to Year/Month
@@ -300,36 +298,39 @@ def barPlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases
 
     global barPlot
     global uniweeknostr
+    # Recreate the SubPlot Layout 
     barPlot = figure(plot_height=600, plot_width=1000, x_range=uniweeknostr, title="Time Series Plot",
                      toolbar_location=None)
 
+    # Data Preprocessing 
     countryDataFrame = cleanDataFrameCountry(selectedCountryIsoCode)
-    data = pd.pivot_table(countryDataFrame, index='date',
-                          columns='iso_code', values=param).reset_index()
-
+ 
+    # Group and Sum active cases into weekly
     group = countryDataFrame.groupby('WeekNo', as_index=False).sum()
 
+    # Mapper from select param to active cases columns
     displayArg = ''
-    if param == 'total_cases':
+    if param == 'total_cases': # for total_cases map to new_cases 
         displayArg = 'new_cases'
 
-    if param == 'total_deaths':
+    if param == 'total_deaths': # for total_death map to new_deaths
         displayArg = 'new_deaths'
 
-    if param == 'total_cases_per_million':
+    if param == 'total_cases_per_million': # for total_cases_per_million map to new_cases_per_million
         displayArg = 'new_cases_per_million'
 
-    if param == 'total_deaths_per_million':
+    if param == 'total_deaths_per_million': # for total_deaths_per_million map to new_deaths_per_million
         displayArg = 'new_deaths_per_million'
 
-    
+    # convert int weekno to str WeekNumber:00
     group['WeekNo'] = 'WeekNumber:' + group['WeekNo'].astype(str)
-
     uniweeknostr = ['WeekNumber:' + x for x in uniweekno]
 
+    # plot active cases for the param received
     barPlot.vbar(
         x=uniweeknostr, top=group[displayArg].values, width=0.9, color='indianred')
     
+    # Mapper to format the str dispalyed in the browser
     if displayArg == 'new_cases':
         displayArg = 'New Cases'
 
