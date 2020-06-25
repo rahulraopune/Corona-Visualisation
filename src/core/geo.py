@@ -426,13 +426,13 @@ def barPlotForContinent(casesDataFrame, countryName, isInit=False):
                               toolbar_location=None, tools="")
 
     continentBarPlot.vbar(x=dodge('country_list', -0.25, range=continentBarPlot.x_range), top='death_list', width=0.2, source=source,
-                          color="#c9d9d3", legend_label="death_list")
+                          color="#c9d9d3", legend_label="Deaths")
 
     continentBarPlot.vbar(x=dodge('country_list',  0.0,  range=continentBarPlot.x_range), top='recovered_list', width=0.2, source=source,
-                          color="#718dbf", legend_label="recovered_list")
+                          color="#718dbf", legend_label="Recovered")
 
     continentBarPlot.vbar(x=dodge('country_list',  0.25, range=continentBarPlot.x_range), top='active_list', width=0.2, source=source,
-                          color="#e84d60", legend_label="active_list")
+                          color="#e84d60", legend_label="Active cases")
 
     continentBarPlot.x_range.range_padding = 0.1
     continentBarPlot.xgrid.grid_line_color = None
