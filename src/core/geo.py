@@ -384,36 +384,62 @@ def piePlotForCountry(isoCode, countryName, isInit=False):
                                    column(piePlot, name='pie_column'), name='row2'))
 
 
-def barPlotForContinent(isoCode, countryName, isInit=False):
-    global continentBarPlot
+def barPlotForContinent(casesDataFrame, countryName, isInit=False):
 
-    fruits = ['Apples', 'Pears', 'Nectarines',
-              'Plums', 'Grapes', 'Strawberries']
-    years = ['2015', '2016', '2017']
+    df = DataFrame(casesDataFrame,columns=['Deaths','Recovered','Active','WHO Region','Country/Region'])
+    selected_country = df.loc[df['Country/Region'] == countryName]
+    selected_region = selected_country['WHO Region']
+    temp_str = selected_region.to_string()
+    extract_str = temp_str[7:]
+    grp_temp = df.groupby('WHO Region').get_group(extract_str)
+    death_list = []
+    recovered_list = []
+    active_list = []
+    country_list = []
+    for name,group in grp_temp.iteritems():
+        if name == 'Deaths':
+            death_list = group.tolist()
+        elif name == 'Recovered':
+            recovered_list =group.tolist()
+        elif name == 'Active':
+            active_list = group.tolist()
+        elif name == 'WHO Region':
+            region_list = group.tolist() # Not Needed
+        elif name == 'Country/Region':
+            country_list = group.tolist()
+        else:
+            break
+    print("death_list", death_list)
+    print("recovered_list", recovered_list)
+    print("active_list", active_list)
+    print("country_list", country_list)
+    lists = ['death_list', 'recovered_list', 'active_list']
 
-    data = {'fruits': fruits,
-            '2015': [2, 1, 4, 3, 2, 4],
-            '2016': [5, 3, 3, 2, 4, 6],
-            '2017': [3, 2, 4, 4, 5, 3]}
+    data = {'country_list': country_list,
+            'death_list': death_list,
+            'recovered_list': recovered_list,
+            'active_list': active_list}
 
     source = ColumnDataSource(data=data)
 
-    continentBarPlot = figure(x_range=fruits, y_range=(0, 10), plot_height=500, plot_width=1200, title="Fruit Counts by Year",
+    continentBarPlot = figure(x_range=country_list,y_range=(0, 200000), plot_height=500, plot_width=1200, title="continentBarPlot",
                               toolbar_location=None, tools="")
 
-    continentBarPlot.vbar(x=dodge('fruits', -0.25, range=continentBarPlot.x_range), top='2015', width=0.2, source=source,
-                          color="#c9d9d3", legend_label="2015")
+    continentBarPlot.vbar(x=dodge('country_list', -0.25, range=continentBarPlot.x_range), top='death_list', width=0.2, source=source,
+                          color="#c9d9d3", legend_label="death_list")
 
-    continentBarPlot.vbar(x=dodge('fruits',  0.0,  range=continentBarPlot.x_range), top='2016', width=0.2, source=source,
-                          color="#718dbf", legend_label="2016")
+    continentBarPlot.vbar(x=dodge('country_list',  0.0,  range=continentBarPlot.x_range), top='recovered_list', width=0.2, source=source,
+                          color="#718dbf", legend_label="recovered_list")
 
-    continentBarPlot.vbar(x=dodge('fruits',  0.25, range=continentBarPlot.x_range), top='2017', width=0.2, source=source,
-                          color="#e84d60", legend_label="2017")
+    continentBarPlot.vbar(x=dodge('country_list',  0.25, range=continentBarPlot.x_range), top='active_list', width=0.2, source=source,
+                          color="#e84d60", legend_label="active_list")
 
     continentBarPlot.x_range.range_padding = 0.1
     continentBarPlot.xgrid.grid_line_color = None
     continentBarPlot.legend.location = "top_left"
     continentBarPlot.legend.orientation = "horizontal"
+
+    
 
     if not isInit:
         # clear line plot from current document
