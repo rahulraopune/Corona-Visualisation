@@ -147,9 +147,10 @@ covidDataFrame1['weekno'] = covidDataFrame1['date'].dt.strftime('%U')
 
 weekno = covidDataFrame1['weekno'].values
 uniweekno = list(OrderedDict.fromkeys(weekno))
+uniweeknostr = ['WeekNumber:' + x for x in uniweekno]
 
 # bar plot init
-barPlot = figure(plot_height=600, plot_width=1000, x_range=uniweekno, title="Time Series Plot",
+barPlot = figure(plot_height=600, plot_width=1000, x_range=uniweeknostr, title="Time Series Plot",
                  toolbar_location=None)
 ########## Bar Plot END-Init #######################
 
@@ -213,7 +214,7 @@ def getSelectorParam():
 
 
 def handleSelectorChange(attrname, old, new):
-    print(attrname, old, new)
+    #print(attrname, old, new)
     patch = generatePatchBasedOnSelect(selector.value)
     geoPlot.add_tools(HoverTool(tooltips=[('Country', '@country'), ('Total Cases',
                                                                     '@total_cases_formatted'), ('Total Deaths', '@total_deaths_formatted')], renderers=[patch]))
@@ -229,12 +230,13 @@ def handleSelectorChange(attrname, old, new):
 ############################################################################
 # Sachin Code impplementation
 
-
 def cleanDataFrameCountry(countryCode):
     dataFrameRef = datasetRaw
     # Add new Year/Month Col and formatted the Year-Month-Day date field to Year/Month
     dataFrameRef['YearMonth'] = pandaRef.to_datetime(dataFrameRef['date']).apply(
         lambda x: '{year}/{month}'.format(year=x.year, month=x.month))
+    dataFrameRef['Month'] = pandaRef.to_datetime(dataFrameRef['date']).apply(
+        lambda x: '{month}'.format(month=x.month))
     dataFrameRef['YearMonthDay'] = pandaRef.to_datetime(dataFrameRef['date']).apply(
         lambda x: '{year}/{month}/{day}'.format(year=x.year, month=x.month, day=x.day))
 
@@ -255,7 +257,7 @@ def linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_case
     countryDataFrame = cleanDataFrameCountry(selectedCountryIsoCode)
     data = pd.pivot_table(countryDataFrame, index='date',
                           columns='iso_code', values=param).reset_index()
-    print(data[selectedCountryIsoCode].values)
+    #print(data[selectedCountryIsoCode].values)
     # strDates = pd.pivot_table(countryDataFrame, index='date',
     #                           columns='iso_code', values='date').reset_index()
     # print(strDates)
@@ -297,12 +299,14 @@ def linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_case
 def barPlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases', isInit=False):
 
     global barPlot
-    barPlot = figure(plot_height=600, plot_width=1000, x_range=uniweekno, title="Time Series Plot",
+    global uniweeknostr
+    barPlot = figure(plot_height=600, plot_width=1000, x_range=uniweeknostr, title="Time Series Plot",
                      toolbar_location=None)
 
     countryDataFrame = cleanDataFrameCountry(selectedCountryIsoCode)
+    data = pd.pivot_table(countryDataFrame, index='date',
+                          columns='iso_code', values=param).reset_index()
 
-    # print(countryDataFrame)
     group = countryDataFrame.groupby('WeekNo', as_index=False).sum()
 
     displayArg = ''
@@ -318,9 +322,14 @@ def barPlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases
     if param == 'total_deaths_per_million':
         displayArg = 'new_deaths_per_million'
 
-    barPlot.vbar(
-        x=uniweekno, top=group[displayArg].values, width=0.9, color='indianred')
+    
+    group['WeekNo'] = 'WeekNumber:' + group['WeekNo'].astype(str)
 
+    uniweeknostr = ['WeekNumber:' + x for x in uniweekno]
+
+    barPlot.vbar(
+        x=uniweeknostr, top=group[displayArg].values, width=0.9, color='indianred')
+    
     if displayArg == 'new_cases':
         displayArg = 'New Cases'
 
@@ -334,10 +343,12 @@ def barPlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases
         displayArg = 'New Deaths Per Million'
 
     barPlot.title.text = 'Weekly Active %s - %s' % (displayArg, country)
-    #barPlot.xaxis.major_label_orientation = math.pi/2
+    barPlot.xaxis.major_label_orientation = 1
+    barPlot.yaxis.formatter.use_scientific = False
     barPlot.xaxis.axis_label = 'Week Number'
     barPlot.yaxis.axis_label = displayArg
     barPlot.xgrid.grid_line_color = None
+
     barPlot.y_range.start = 0
 
     if not isInit:
