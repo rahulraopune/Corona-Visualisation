@@ -352,7 +352,7 @@ def barPlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases
     if displayArg == 'new_deaths_per_million':
         displayArg = 'New Deaths Per Million'
 
-    barPlot.title.text = 'Weekly Active %s - %s' % (displayArg, country)
+    barPlot.title.text = 'Weekly Reported %s - %s' % (displayArg, country)
     barPlot.xaxis.major_label_orientation = 1
     barPlot.yaxis.formatter.use_scientific = False
     barPlot.xaxis.axis_label = 'Week Number'
