@@ -23,6 +23,8 @@ from math import pi
 
 from datetime import datetime
 
+from pandas.core.frame import DataFrame
+
 PALETTE_SIZE = 8
 
 # geomap
@@ -55,10 +57,13 @@ covidDataFrame = datasetRaw.groupby(['iso_code'], as_index=False).head(1)
 
 # cases dataset
 casesDatasetRaw = pd.read_csv(
-    join(dirname(__file__), 'datasets', 'datasets_494766_1267375_country_wise_latest.csv'))
+    join(dirname(__file__), 'datasets', 'datasets_494766_1283557_country_wise_latest.csv'))
 casesDataset = covidDataFrame.merge(
     casesDatasetRaw, how='left', left_on='location', right_on='Country/Region')
 # print(casesDataset[casesDataset['iso_code'] == 'IND']['Active'])
+sortedCasesDataset = casesDataset.sort_values(by='date', ascending=True)
+dodgeInput = DataFrame(sortedCasesDataset, columns=['iso_code',
+                                                    'Deaths', 'Recovered', 'Active', 'WHO Region', 'Country/Region'])
 
 # format numbers to en_US locale for better readability
 locale.setlocale(locale.LC_ALL, 'en_US')
@@ -147,7 +152,7 @@ covidDataFrame1['weekno'] = covidDataFrame1['date'].dt.strftime('%U')
 
 weekno = covidDataFrame1['weekno'].values
 uniweekno = list(OrderedDict.fromkeys(weekno))
-uniweeknostr = ['WeekNumber:' + x for x in uniweekno]
+uniweeknostr = [x for x in uniweekno]
 
 # bar plot init
 barPlot = figure(plot_height=600, plot_width=1000, x_range=uniweeknostr, title="Time Series Plot",
@@ -180,6 +185,11 @@ def init():
                               selectedCountryName, getSelectorParam(), isInit=True)
     barPlotForContinent(selectedCountryIsoCode,
                         selectedCountryName, isInit=True)
+
+    layout = column(row(column(selector, geoPlot),
+                        row(linePlot, name='line_plot'),
+                        name='row1'), row(column(barPlot, name='bar_column'), column(piePlot, name='pie_column'), name='row2'), row(continentBarPlot, name='row3'), name='mainLayout')
+    curdoc().add_root(layout)
 
 
 def generatePatchBasedOnSelect(selectValue):
@@ -214,7 +224,7 @@ def getSelectorParam():
 
 
 def handleSelectorChange(attrname, old, new):
-    #print(attrname, old, new)
+    # print(attrname, old, new)
     patch = generatePatchBasedOnSelect(selector.value)
     geoPlot.add_tools(HoverTool(tooltips=[('Country', '@country'), ('Total Cases',
                                                                     '@total_cases_formatted'), ('Total Deaths', '@total_deaths_formatted')], renderers=[patch]))
@@ -225,9 +235,15 @@ def handleSelectorChange(attrname, old, new):
 
     barPlotCountryTotalCases(selectedCountryIsoCode,
                              selectedCountryName, param=getSelectorParam())
+
+    barPlotForContinent(selectedCountryIsoCode,
+                        selectedCountryName)
+
 ################################
 # clean the dataframe for the country selected during interaction operation
 # Addtion WeekNo, YearMonth columns added as required by subplots
+
+
 def cleanDataFrameCountry(countryCode):
     dataFrameRef = datasetRaw
     # Add new Year/Month Col and formatted the Year-Month-Day date field to Year/Month
@@ -255,10 +271,6 @@ def linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_case
     countryDataFrame = cleanDataFrameCountry(selectedCountryIsoCode)
     data = pd.pivot_table(countryDataFrame, index='date',
                           columns='iso_code', values=param).reset_index()
-    #print(data[selectedCountryIsoCode].values)
-    # strDates = pd.pivot_table(countryDataFrame, index='date',
-    #                           columns='iso_code', values='date').reset_index()
-    # print(strDates)
     linePlot.grid.grid_line_alpha = 0.1
     linePlot.xaxis.axis_label = 'Date'
     linePlot.yaxis.axis_label = selector.value
@@ -267,7 +279,6 @@ def linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_case
     linePlot.yaxis.formatter.use_scientific = False
     linePlot.xaxis.formatter = DatetimeTickFormatter(
         hours=["%d %B %Y"], days=["%d %B %Y"], months=["%d %B %Y"], years=["%d %B %Y"])
-    # linePlot.legend = False
     formattedDate = [pd.to_datetime(np.datetime_as_string(value, unit='D')).strftime(
         "%d %B %Y") for value in data['date'].values]
 
@@ -277,12 +288,11 @@ def linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_case
         data={'x': np.array(data['date'], dtype=np.datetime64), 'y': data[selectedCountryIsoCode], 'data_str': formattedData, 'date_str': formattedDate})
     hover = HoverTool(
         tooltips=[('Date', '@date_str'), (selector.value, '@data_str')])
-    # hover = HoverTool(tooltips=[('date', '@DateTime{%F}'),(param, '@y')],
-    #       formatters={'@DateTime': 'date'})
     linePlot.add_tools(hover)
     linePlot.line(x='x', y='y', source=source, color="orange",
                   legend_label=country, line_width=3)
     linePlot.legend.location = "top_left"
+    linePlot.xaxis.major_label_orientation = 1
 
     if not isInit:
         # clear line plot from current document
@@ -295,41 +305,40 @@ def linePlotCountryTotalCases(selectedCountryIsoCode, country, param='total_case
 
 
 def barPlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases', isInit=False):
-
     global barPlot
     global uniweeknostr
-    # Recreate the SubPlot Layout 
+    # Recreate the SubPlot Layout
     barPlot = figure(plot_height=600, plot_width=1000, x_range=uniweeknostr, title="Time Series Plot",
                      toolbar_location=None)
 
-    # Data Preprocessing 
+    # Data Preprocessing
     countryDataFrame = cleanDataFrameCountry(selectedCountryIsoCode)
- 
+
     # Group and Sum active cases into weekly
     group = countryDataFrame.groupby('WeekNo', as_index=False).sum()
 
     # Mapper from select param to active cases columns
     displayArg = ''
-    if param == 'total_cases': # for total_cases map to new_cases 
+    if param == 'total_cases':  # for total_cases map to new_cases
         displayArg = 'new_cases'
 
-    if param == 'total_deaths': # for total_death map to new_deaths
+    if param == 'total_deaths':  # for total_death map to new_deaths
         displayArg = 'new_deaths'
 
-    if param == 'total_cases_per_million': # for total_cases_per_million map to new_cases_per_million
+    if param == 'total_cases_per_million':  # for total_cases_per_million map to new_cases_per_million
         displayArg = 'new_cases_per_million'
 
-    if param == 'total_deaths_per_million': # for total_deaths_per_million map to new_deaths_per_million
+    if param == 'total_deaths_per_million':  # for total_deaths_per_million map to new_deaths_per_million
         displayArg = 'new_deaths_per_million'
 
     # convert int weekno to str WeekNumber:00
-    group['WeekNo'] = 'WeekNumber:' + group['WeekNo'].astype(str)
-    uniweeknostr = ['WeekNumber:' + x for x in uniweekno]
+    group['WeekNo'] = group['WeekNo'].astype(str)
+    uniweeknostr = [x for x in uniweekno]
 
     # plot active cases for the param received
     barPlot.vbar(
         x=uniweeknostr, top=group[displayArg].values, width=0.9, color='indianred')
-    
+
     # Mapper to format the str dispalyed in the browser
     if displayArg == 'new_cases':
         displayArg = 'New Cases'
@@ -363,7 +372,7 @@ def barPlotCountryTotalCases(selectedCountryIsoCode, country, param='total_cases
                                    column(piePlot, name='pie_column'), name='row2'))
 
 
-def piePlotForCountry(isoCode, countryName, isInit=False):
+def piePlotForCountry(isoCode, selectedCountryName, isInit=False):
     sourceJson = (casesDataset[casesDataset['iso_code'] == isoCode][[
                   'Deaths', 'Recovered', 'Active']]).to_json(orient='records')
     json_data = json.loads(sourceJson)[0]
@@ -396,36 +405,64 @@ def piePlotForCountry(isoCode, countryName, isInit=False):
                                    column(piePlot, name='pie_column'), name='row2'))
 
 
-def barPlotForContinent(isoCode, countryName, isInit=False):
+def barPlotForContinent(selectedCountryIsoCode, selectedCountryName, isInit=False):
     global continentBarPlot
+    selected_country = dodgeInput.loc[dodgeInput['iso_code']
+                                      == selectedCountryIsoCode]
+    selected_region = selected_country['WHO Region']
+    temp_str = selected_region.to_string(index=False)
+    extract_str = temp_str[1:]
+    grp_temp = dodgeInput.groupby('WHO Region').get_group(extract_str)
+    grp_temp = grp_temp.drop(columns=['iso_code'])
+    death_list = []
+    recovered_list = []
+    active_list = []
+    country_list = []
+    for name, group in grp_temp.iteritems():
+        if name == 'Deaths':
+            death_list = group.tolist()
+        elif name == 'Recovered':
+            recovered_list = group.tolist()
+        elif name == 'Active':
+            active_list = group.tolist()
+        elif name == 'WHO Region':
+            region_list = group.tolist()  # Not Needed
+        elif name == 'Country/Region':
+            country_list = group.tolist()
+        else:
+            break
+    lists = ['active_list', 'recovered_list', 'death_list']
 
-    fruits = ['Apples', 'Pears', 'Nectarines',
-              'Plums', 'Grapes', 'Strawberries']
-    years = ['2015', '2016', '2017']
-
-    data = {'fruits': fruits,
-            '2015': [2, 1, 4, 3, 2, 4],
-            '2016': [5, 3, 3, 2, 4, 6],
-            '2017': [3, 2, 4, 4, 5, 3]}
+    data = {'country_list': country_list[:7],
+            'death_list': death_list[:7],
+            'recovered_list': recovered_list[:7],
+            'active_list': active_list[:7]}
 
     source = ColumnDataSource(data=data)
 
-    continentBarPlot = figure(x_range=fruits, y_range=(0, 10), plot_height=500, plot_width=1200, title="Fruit Counts by Year",
-                              toolbar_location=None, tools="")
+    continentBarPlot = figure(x_range=country_list[:7], y_axis_type="log", plot_height=500, plot_width=1200, title="continentBarPlot",
+                              toolbar_location=None, tools="hover", tooltips="@country_list")
 
-    continentBarPlot.vbar(x=dodge('fruits', -0.25, range=continentBarPlot.x_range), top='2015', width=0.2, source=source,
-                          color="#c9d9d3", legend_label="2015")
+    continentBarPlot.vbar(x=dodge('country_list',  0.25, range=continentBarPlot.x_range), bottom=0.01, top='active_list', width=0.2, source=source,
+                          color="#e84d60", legend_label="Active Cases")
+    continentBarPlot.vbar(x=dodge('country_list',  0.0,  range=continentBarPlot.x_range), bottom=0.01, top='recovered_list', width=0.2, source=source,
+                          color="#718dbf", legend_label="Recovered")
+    continentBarPlot.vbar(x=dodge('country_list', -0.25, range=continentBarPlot.x_range), bottom=0.01, top='death_list', width=0.2, source=source,
+                          color="#c9d9d3", legend_label="Deaths")
 
-    continentBarPlot.vbar(x=dodge('fruits',  0.0,  range=continentBarPlot.x_range), top='2016', width=0.2, source=source,
-                          color="#718dbf", legend_label="2016")
-
-    continentBarPlot.vbar(x=dodge('fruits',  0.25, range=continentBarPlot.x_range), top='2017', width=0.2, source=source,
-                          color="#e84d60", legend_label="2017")
-
+    continentBarPlot.title.text = 'Selected Country - %s' % (
+        selectedCountryName)
     continentBarPlot.x_range.range_padding = 0.1
     continentBarPlot.xgrid.grid_line_color = None
-    continentBarPlot.legend.location = "top_left"
-    continentBarPlot.legend.orientation = "horizontal"
+    continentBarPlot.y_range.start = 10 ** 0
+    continentBarPlot.y_range.end = 10 ** 6
+    continentBarPlot.legend.location = "top_right"
+    continentBarPlot.legend.orientation = "vertical"
+    continentBarPlot.xaxis.axis_label = 'Country'
+
+    hover = HoverTool(
+        tooltips=[('Active ', '@active_list'), ('Recovered', '@recovered_list'), ('Dead', '@death_list')])
+    continentBarPlot.add_tools(hover)
 
     if not isInit:
         # clear line plot from current document
@@ -450,7 +487,7 @@ def handleTap(model):
     piePlotForCountry(selectedCountryIsoCode, selectedCountryName)
     linePlotCountryTotalCases(selectedCountryIsoCode,
                               selectedCountryName, getSelectorParam())
-    barPlotForContinent(selectedCountryIsoCode, selectedCountryName)                              
+    barPlotForContinent(selectedCountryIsoCode, selectedCountryName)
     # print(selectedCountryIsoCode)
 
 
@@ -462,8 +499,3 @@ geoPlot.on_event(Tap, handleTap)
 
 # initialize the geoPlot
 init()
-
-layout = column(row(column(selector, geoPlot),
-                    row(linePlot, name='line_plot'),
-                    name='row1'), row(column(barPlot, name='bar_column'), column(piePlot, name='pie_column'), name='row2'), row(continentBarPlot, name='row3'), name='mainLayout')
-curdoc().add_root(layout)
