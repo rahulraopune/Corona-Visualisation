@@ -62,7 +62,8 @@ casesDataset = covidDataFrame.merge(
     casesDatasetRaw, how='left', left_on='location', right_on='Country/Region')
 # print(casesDataset[casesDataset['iso_code'] == 'IND']['Active'])
 sortedCasesDataset = casesDataset.sort_values(by='date', ascending=True)
-dodgeInput = DataFrame(sortedCasesDataset,columns=['Deaths','Recovered','Active','WHO Region','Country/Region'])
+dodgeInput = DataFrame(sortedCasesDataset, columns=[ 'iso_code',
+                       'Deaths', 'Recovered', 'Active', 'WHO Region', 'Country/Region'])
 
 # format numbers to en_US locale for better readability
 locale.setlocale(locale.LC_ALL, 'en_US')
@@ -181,7 +182,13 @@ def init():
     piePlotForCountry(selectedCountryIsoCode, selectedCountryName, isInit=True)
     linePlotCountryTotalCases(selectedCountryIsoCode,
                               selectedCountryName, getSelectorParam(), isInit=True)
-    barPlotForContinent(selectedCountryName, isInit=True)
+    barPlotForContinent(selectedCountryIsoCode,
+                        selectedCountryName, isInit=True)
+
+    layout = column(row(column(selector, geoPlot),
+                        row(linePlot, name='line_plot'),
+                        name='row1'), row(column(barPlot, name='bar_column'), column(piePlot, name='pie_column'), name='row2'), row(continentBarPlot, name='row3'), name='mainLayout')
+    curdoc().add_root(layout)
 
 
 def generatePatchBasedOnSelect(selectValue):
@@ -387,35 +394,39 @@ def piePlotForCountry(isoCode, selectedCountryName, isInit=False):
                                    column(piePlot, name='pie_column'), name='row2'))
 
 
-def barPlotForContinent(selectedCountryName, isInit=False):
+def barPlotForContinent(selectedCountryIsoCode, selectedCountryName, isInit=False):
+    
     global continentBarPlot
 
-    selected_country = dodgeInput.loc[dodgeInput['Country/Region'] == selectedCountryName]
+    selected_country = dodgeInput.loc[dodgeInput['iso_code']
+                                      == selectedCountryIsoCode]
+    print(selected_country)
     selected_region = selected_country['WHO Region']
     temp_str = selected_region.to_string(index=False)
     extract_str = temp_str[1:]
     grp_temp = dodgeInput.groupby('WHO Region').get_group(extract_str)
+    grp_temp = grp_temp.drop(columns=['iso_code'])
     death_list = []
     recovered_list = []
     active_list = []
     country_list = []
-    for name,group in grp_temp.iteritems():
+    for name, group in grp_temp.iteritems():
         if name == 'Deaths':
             death_list = group.tolist()
         elif name == 'Recovered':
-            recovered_list =group.tolist()
+            recovered_list = group.tolist()
         elif name == 'Active':
             active_list = group.tolist()
         elif name == 'WHO Region':
-            region_list = group.tolist() # Not Needed
+            region_list = group.tolist()  # Not Needed
         elif name == 'Country/Region':
             country_list = group.tolist()
         else:
             break
-    print("death_list", death_list)
-    print("recovered_list", recovered_list)
-    print("active_list", active_list)
-    print("country_list", country_list)
+    # print("death_list", death_list)
+    # print("recovered_list", recovered_list)
+    # print("active_list", active_list)
+    # print("country_list", country_list)
     lists = ['death_list', 'recovered_list', 'active_list']
 
     data = {'country_list': country_list[:7],
@@ -425,25 +436,27 @@ def barPlotForContinent(selectedCountryName, isInit=False):
 
     source = ColumnDataSource(data=data)
 
-    continentBarPlot = figure(x_range=country_list[:7],y_axis_type="log", plot_height=500, plot_width=1200, title="continentBarPlot",
-                              toolbar_location=None, tools="hover" , tooltips="@country_list")
+    continentBarPlot = figure(x_range=country_list[:7], y_axis_type="log", plot_height=500, plot_width=1200, title="continentBarPlot",
+                              toolbar_location=None, tools="hover", tooltips="@country_list")
 
-    continentBarPlot.vbar(x=dodge('country_list', -0.25, range=continentBarPlot.x_range),bottom = 0.01, top='death_list', width=0.2, source=source,
+    continentBarPlot.vbar(x=dodge('country_list', -0.25, range=continentBarPlot.x_range), bottom=0.01, top='death_list', width=0.2, source=source,
                           color="#c9d9d3", legend_label="Deaths")
 
-    continentBarPlot.vbar(x=dodge('country_list',  0.0,  range=continentBarPlot.x_range),bottom = 0.01, top='recovered_list', width=0.2, source=source,
+    continentBarPlot.vbar(x=dodge('country_list',  0.0,  range=continentBarPlot.x_range), bottom=0.01, top='recovered_list', width=0.2, source=source,
                           color="#718dbf", legend_label="Recovered")
 
-    continentBarPlot.vbar(x=dodge('country_list',  0.25, range=continentBarPlot.x_range),bottom = 0.01, top='active_list', width=0.2, source=source,
+    continentBarPlot.vbar(x=dodge('country_list',  0.25, range=continentBarPlot.x_range), bottom=0.01, top='active_list', width=0.2, source=source,
                           color="#e84d60", legend_label="Active Cases")
 
-    continentBarPlot.title.text = 'Selected Country - %s' %(selectedCountryName)
+    continentBarPlot.title.text = 'Selected Country - %s' % (
+        selectedCountryName)
     continentBarPlot.x_range.range_padding = 0.1
     continentBarPlot.xgrid.grid_line_color = None
     continentBarPlot.y_range.start = 10 ** 0
     continentBarPlot.y_range.end = 10 ** 6
     continentBarPlot.legend.location = "top_right"
     continentBarPlot.legend.orientation = "vertical"
+    continentBarPlot.xaxis.axis_label = 'Country'
 
     if not isInit:
         # clear line plot from current document
@@ -468,7 +481,7 @@ def handleTap(model):
     piePlotForCountry(selectedCountryIsoCode, selectedCountryName)
     linePlotCountryTotalCases(selectedCountryIsoCode,
                               selectedCountryName, getSelectorParam())
-    barPlotForContinent(selectedCountryName)
+    barPlotForContinent(selectedCountryIsoCode, selectedCountryName)
     # print(selectedCountryIsoCode)
 
 
@@ -480,8 +493,3 @@ geoPlot.on_event(Tap, handleTap)
 
 # initialize the geoPlot
 init()
-
-layout = column(row(column(selector, geoPlot),
-                    row(linePlot, name='line_plot'),
-                    name='row1'), row(column(barPlot, name='bar_column'), column(piePlot, name='pie_column'), name='row2'), row(continentBarPlot, name='row3'), name='mainLayout')
-curdoc().add_root(layout)
